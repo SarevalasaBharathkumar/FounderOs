@@ -1,6 +1,6 @@
 "use client";
-import { useEffect, useState } from "react";
-import { callAgentWithPrompt, pushActivity } from "../agents/interactive";
+import { useEffect, useRef, useState } from "react";
+import { callAdvisorFollowup, callAgentWithPrompt, pushActivity } from "../agents/interactive";
 import { FONTS, T } from "../styles/tokens";
 
 const skeletonStyle = {
@@ -84,22 +84,41 @@ function PanelChat({ data, objective, onAction }) {
   const [input, setInput] = useState("");
   const [history, setHistory] = useState([]);
   const [busy, setBusy] = useState(false);
+  const abortRef = useRef(null);
 
   const submit = async () => {
     const text = input.trim();
     if (!text || busy) return;
-    setBusy(true);
+    const nextHistory = [...history, { role: "user", content: text }];
+    setHistory(nextHistory);
     setInput("");
+    setBusy(true);
+    const controller = new AbortController();
+    abortRef.current = controller;
     try {
-      const response = await callAgentWithPrompt(
-        "gtm",
-        `Objective: ${objective}\nCurrent output: ${JSON.stringify(data)}\nFounder says: ${text}`
-      );
-      setHistory((prev) => [...prev, { founder: text, agent: response }]);
+      const response = await callAdvisorFollowup({
+        objective,
+        data,
+        conversationHistory: nextHistory,
+        userMessage: text,
+        signal: controller.signal,
+      });
+      setHistory((prev) => [...prev, { role: "assistant", content: response }]);
       onAction?.();
     } catch (error) {
-      setHistory((prev) => [...prev, { founder: text, agent: { error: error.message } }]);
+      if (error.name !== "AbortError") {
+        setHistory((prev) => [...prev, { role: "assistant", content: `I hit an error: ${error.message}` }]);
+      }
     } finally {
+      abortRef.current = null;
+      setBusy(false);
+    }
+  };
+
+  const stop = () => {
+    if (abortRef.current) {
+      abortRef.current.abort();
+      abortRef.current = null;
       setBusy(false);
     }
   };
@@ -122,17 +141,60 @@ function PanelChat({ data, objective, onAction }) {
             outline: "none",
           }}
         />
-        <button type="button" onClick={submit} disabled={busy} style={{ ...actionBase, fontSize: "0.75rem" }}>
-          Send
+        <button
+          type="button"
+          onClick={busy ? stop : submit}
+          disabled={!busy && !input.trim()}
+          style={{ ...actionBase, fontSize: "0.75rem", minWidth: 46 }}
+        >
+          {busy ? "■" : "Send"}
         </button>
       </div>
-      <div style={{ display: "grid", gap: 8, marginTop: 10 }}>
+      <div style={{ display: "flex", flexDirection: "column", gap: 10, maxHeight: 400, overflowY: "auto", padding: "1rem 0" }}>
         {history.map((item, index) => (
-          <div key={`${item.founder}-${index}`} style={{ display: "grid", gap: 6 }}>
-            <div style={{ justifySelf: "end", maxWidth: "85%", background: T.accentGlow, border: `1px solid ${T.accent}`, color: T.text, borderRadius: 10, padding: "8px 10px" }}>{item.founder}</div>
-            <div style={{ justifySelf: "start", maxWidth: "85%", background: T.surfaceAlt, border: `1px solid ${T.border}`, color: T.dim, borderRadius: 10, padding: "8px 10px", whiteSpace: "pre-wrap" }}>{JSON.stringify(item.agent, null, 2)}</div>
+          <div
+            key={`${item.role}-${index}`}
+            style={
+              item.role === "user"
+                ? {
+                    background: "rgba(99,102,241,0.15)",
+                    border: "1px solid rgba(99,102,241,0.2)",
+                    borderRadius: "12px 12px 2px 12px",
+                    padding: "10px 14px",
+                    fontFamily: FONTS.sans,
+                    fontWeight: 400,
+                    fontSize: "0.85rem",
+                    color: "#ffffff",
+                    maxWidth: "80%",
+                    alignSelf: "flex-end",
+                  }
+                : {
+                    background: "rgba(255,255,255,0.04)",
+                    border: "1px solid rgba(255,255,255,0.07)",
+                    borderRadius: "12px 12px 12px 2px",
+                    padding: "10px 14px",
+                    fontFamily: FONTS.sans,
+                    fontWeight: 400,
+                    fontSize: "0.85rem",
+                    color: "#a1a1aa",
+                    maxWidth: "85%",
+                    alignSelf: "flex-start",
+                    whiteSpace: "pre-wrap",
+                    lineHeight: 1.6,
+                  }
+            }
+          >
+            {item.content}
           </div>
         ))}
+        {busy ? (
+          <div style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.07)", borderRadius: "12px 12px 12px 2px", padding: "10px 14px", maxWidth: "85%", alignSelf: "flex-start", display: "inline-flex", gap: 6, alignItems: "center" }}>
+            {[0, 1, 2].map((dot) => (
+              <span key={dot} style={{ width: 6, height: 6, borderRadius: "50%", background: "#a1a1aa", animation: `typingPulse 1s ${dot * 0.2}s infinite ease-in-out`, display: "inline-block" }} />
+            ))}
+            <style>{`@keyframes typingPulse {0%,100%{transform:scale(0.8);opacity:0.55;}50%{transform:scale(1.15);opacity:1;}}`}</style>
+          </div>
+        ) : null}
       </div>
     </div>
   );
@@ -180,7 +242,7 @@ export default function GTMPanel({ data, loading, objective = "", onDataPatch, o
       <div style={{ minHeight: 260, display: "grid", placeItems: "center", textAlign: "center", border: `1px dashed ${T.border}`, borderRadius: 14, background: T.surface, color: T.dim, padding: 24 }}>
         <div>
           <div style={{ fontSize: 34, opacity: 0.35, marginBottom: 10 }}>⚡</div>
-          <div style={{ fontFamily: FONTS.display, fontSize: 16 }}>Run an objective to see your roadmap</div>
+          <div style={{ fontFamily: FONTS.sans, fontSize: 16 }}>Run an objective to see your roadmap</div>
         </div>
       </div>
     );
@@ -200,11 +262,11 @@ export default function GTMPanel({ data, loading, objective = "", onDataPatch, o
 
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: 12 }}>
         <div style={{ border: `1px solid ${T.border}`, borderRadius: 12, background: T.surface, padding: 14 }}>
-          <div style={{ color: T.text, fontFamily: FONTS.display, fontWeight: 700, marginBottom: 10 }}>Target Segments</div>
+          <div style={{ color: T.text, fontFamily: FONTS.sans, fontWeight: 700, marginBottom: 10 }}>Target Segments</div>
           <div style={{ display: "grid", gap: 10 }}>
             {segments.map((segment, index) => (
               <div key={`${segment.segment || "segment"}-${index}`} style={{ border: `1px solid ${T.border}`, borderRadius: 10, background: T.surfaceAlt, padding: 12 }}>
-                <div style={{ color: T.text, fontFamily: FONTS.display, fontWeight: 700, marginBottom: 8 }}>{segment.segment}</div>
+                <div style={{ color: T.text, fontFamily: FONTS.sans, fontWeight: 700, marginBottom: 8 }}>{segment.segment}</div>
                 <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginBottom: 8 }}>
                   <span style={{ borderRadius: 999, border: `1px solid ${T.border}`, color: T.dim, fontFamily: FONTS.mono, fontSize: 12, padding: "3px 8px" }}>Size: {segment.size}</span>
                   <span style={{ borderRadius: 999, border: `1px solid ${T.accentSoft}`, color: T.accent, fontFamily: FONTS.mono, fontSize: 12, padding: "3px 8px" }}>Channel: {segment.channel}</span>
@@ -217,11 +279,11 @@ export default function GTMPanel({ data, loading, objective = "", onDataPatch, o
         </div>
 
         <div style={{ border: `1px solid ${T.border}`, borderRadius: 12, background: T.surface, padding: 14 }}>
-          <div style={{ color: T.text, fontFamily: FONTS.display, fontWeight: 700, marginBottom: 10 }}>Channels</div>
+          <div style={{ color: T.text, fontFamily: FONTS.sans, fontWeight: 700, marginBottom: 10 }}>Channels</div>
           <div style={{ display: "grid", gap: 10 }}>
             {channels.map((channel) => (
               <div key={channel.key} style={{ border: `1px solid ${T.border}`, borderRadius: 10, background: T.surfaceAlt, padding: 12 }}>
-                <div style={{ color: T.text, fontFamily: FONTS.display, fontWeight: 700, marginBottom: 6 }}>{channel.name}</div>
+                <div style={{ color: T.text, fontFamily: FONTS.sans, fontWeight: 700, marginBottom: 6 }}>{channel.name}</div>
                 <div style={{ color: T.dim, fontSize: 13, marginBottom: 6 }}>Tactic: {channel.tactic}</div>
                 <div style={{ display: "inline-block", borderRadius: 999, border: `1px solid ${T.green}`, color: T.green, background: `${T.green}1f`, fontFamily: FONTS.mono, fontSize: 12, padding: "3px 8px" }}>
                   ROI: {channel.roi}
@@ -234,7 +296,7 @@ export default function GTMPanel({ data, loading, objective = "", onDataPatch, o
       </div>
 
       <div style={{ border: `1px solid ${T.border}`, borderRadius: 12, background: T.surface, padding: 14 }}>
-        <div style={{ color: T.text, fontFamily: FONTS.display, fontWeight: 700, marginBottom: 10 }}>First Customer Playbook</div>
+        <div style={{ color: T.text, fontFamily: FONTS.sans, fontWeight: 700, marginBottom: 10 }}>First Customer Playbook</div>
         <div style={{ display: "grid", gap: 8 }}>
           {playbook.map((step, index) => (
             <div key={`${step}-${index}`} style={{ display: "flex", gap: 10, alignItems: "start" }}>
@@ -247,7 +309,7 @@ export default function GTMPanel({ data, loading, objective = "", onDataPatch, o
       </div>
 
       <div style={{ border: `1px solid ${T.border}`, borderRadius: 12, background: T.surface, padding: 14 }}>
-        <div style={{ color: T.text, fontFamily: FONTS.display, fontWeight: 700, marginBottom: 10 }}>Pricing Strategy: {pricing.model}</div>
+        <div style={{ color: T.text, fontFamily: FONTS.sans, fontWeight: 700, marginBottom: 10 }}>Pricing Strategy: {pricing.model}</div>
         <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginBottom: 10 }}>
           {pricing.tiers.map((tier, index) => (
             <span key={`${tier}-${index}`} style={{ borderRadius: 999, border: `1px solid ${T.amber}`, color: T.amber, background: `${T.amber}1f`, fontFamily: FONTS.mono, fontSize: 12, padding: "3px 8px" }}>

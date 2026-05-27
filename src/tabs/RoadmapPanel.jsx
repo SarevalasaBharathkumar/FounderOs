@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useMemo, useState } from "react";
-import { callAgentWithPrompt, getTaskStorage, pushActivity, setTaskStorage } from "../agents/interactive";
+import { useRef } from "react";
+import { callAdvisorFollowup, callAgentWithPrompt, getTaskStorage, pushActivity, setTaskStorage } from "../agents/interactive";
 import { FONTS, T } from "../styles/tokens";
 
 const skeletonStyle = {
@@ -81,23 +82,41 @@ function PanelChat({ data, objective, onAction }) {
   const [input, setInput] = useState("");
   const [history, setHistory] = useState([]);
   const [busy, setBusy] = useState(false);
+  const abortRef = useRef(null);
 
   const submit = async () => {
     const text = input.trim();
     if (!text || busy) return;
-    setBusy(true);
+    const nextHistory = [...history, { role: "user", content: text }];
+    setHistory(nextHistory);
     setInput("");
-
+    setBusy(true);
+    const controller = new AbortController();
+    abortRef.current = controller;
     try {
-      const response = await callAgentWithPrompt(
-        "strategist",
-        `Objective: ${objective}\nCurrent output: ${JSON.stringify(data)}\nFounder says: ${text}`
-      );
-      setHistory((prev) => [...prev, { founder: text, agent: response }]);
+      const response = await callAdvisorFollowup({
+        objective,
+        data,
+        conversationHistory: nextHistory,
+        userMessage: text,
+        signal: controller.signal,
+      });
+      setHistory((prev) => [...prev, { role: "assistant", content: response }]);
       onAction();
     } catch (error) {
-      setHistory((prev) => [...prev, { founder: text, agent: { error: error.message } }]);
+      if (error.name !== "AbortError") {
+        setHistory((prev) => [...prev, { role: "assistant", content: `I hit an error: ${error.message}` }]);
+      }
     } finally {
+      abortRef.current = null;
+      setBusy(false);
+    }
+  };
+
+  const stop = () => {
+    if (abortRef.current) {
+      abortRef.current.abort();
+      abortRef.current = null;
       setBusy(false);
     }
   };
@@ -125,43 +144,83 @@ function PanelChat({ data, objective, onAction }) {
             outline: "none",
           }}
         />
-        <button type="button" onClick={submit} disabled={busy} style={{ ...actionBase, fontSize: "0.75rem" }}>
-          Send
+        <button
+          type="button"
+          onClick={busy ? stop : submit}
+          disabled={!busy && !input.trim()}
+          style={{ ...actionBase, fontSize: "0.75rem", minWidth: 46 }}
+        >
+          {busy ? "■" : "Send"}
         </button>
       </div>
 
-      <div style={{ display: "grid", gap: 8, marginTop: 10 }}>
+      <div style={{ display: "flex", flexDirection: "column", gap: 10, maxHeight: 400, overflowY: "auto", padding: "1rem 0" }}>
         {history.map((item, index) => (
-          <div key={`${item.founder}-${index}`} style={{ display: "grid", gap: 6 }}>
-            <div
-              style={{
-                justifySelf: "end",
-                maxWidth: "85%",
-                background: T.accentGlow,
-                border: `1px solid ${T.accent}`,
-                color: T.text,
-                borderRadius: 10,
-                padding: "8px 10px",
-              }}
-            >
-              {item.founder}
-            </div>
-            <div
-              style={{
-                justifySelf: "start",
-                maxWidth: "85%",
-                background: T.surfaceAlt,
-                border: `1px solid ${T.border}`,
-                color: T.dim,
-                borderRadius: 10,
-                padding: "8px 10px",
-                whiteSpace: "pre-wrap",
-              }}
-            >
-              {JSON.stringify(item.agent, null, 2)}
-            </div>
+          <div
+            key={`${item.role}-${index}`}
+            style={
+              item.role === "user"
+                ? {
+                    background: "rgba(99,102,241,0.15)",
+                    border: "1px solid rgba(99,102,241,0.2)",
+                    borderRadius: "12px 12px 2px 12px",
+                    padding: "10px 14px",
+                    fontFamily: FONTS.sans,
+                    fontWeight: 400,
+                    fontSize: "0.85rem",
+                    color: "#ffffff",
+                    maxWidth: "80%",
+                    alignSelf: "flex-end",
+                  }
+                : {
+                    background: "rgba(255,255,255,0.04)",
+                    border: "1px solid rgba(255,255,255,0.07)",
+                    borderRadius: "12px 12px 12px 2px",
+                    padding: "10px 14px",
+                    fontFamily: FONTS.sans,
+                    fontWeight: 400,
+                    fontSize: "0.85rem",
+                    color: "#a1a1aa",
+                    maxWidth: "85%",
+                    alignSelf: "flex-start",
+                    whiteSpace: "pre-wrap",
+                    lineHeight: 1.6,
+                  }
+            }
+          >
+            {item.content}
           </div>
         ))}
+        {busy ? (
+          <div
+            style={{
+              background: "rgba(255,255,255,0.04)",
+              border: "1px solid rgba(255,255,255,0.07)",
+              borderRadius: "12px 12px 12px 2px",
+              padding: "10px 14px",
+              maxWidth: "85%",
+              alignSelf: "flex-start",
+              display: "inline-flex",
+              gap: 6,
+              alignItems: "center",
+            }}
+          >
+            {[0, 1, 2].map((dot) => (
+              <span
+                key={dot}
+                style={{
+                  width: 6,
+                  height: 6,
+                  borderRadius: "50%",
+                  background: "#a1a1aa",
+                  animation: `typingPulse 1s ${dot * 0.2}s infinite ease-in-out`,
+                  display: "inline-block",
+                }}
+              />
+            ))}
+            <style>{`@keyframes typingPulse {0%,100%{transform:scale(0.8);opacity:0.55;}50%{transform:scale(1.15);opacity:1;}}`}</style>
+          </div>
+        ) : null}
       </div>
     </div>
   );
@@ -284,7 +343,7 @@ export default function RoadmapPanel({ data, loading, objective = "", onDataPatc
       >
         <div>
           <div style={{ fontSize: 34, opacity: 0.35, marginBottom: 10 }}>⚡</div>
-          <div style={{ fontFamily: FONTS.display, fontSize: 16 }}>Run an objective to see your roadmap</div>
+          <div style={{ fontFamily: FONTS.sans, fontSize: 16 }}>Run an objective to see your roadmap</div>
         </div>
       </div>
     );
@@ -316,7 +375,7 @@ export default function RoadmapPanel({ data, loading, objective = "", onDataPatc
       </div>
 
       <div style={{ border: `1px solid ${T.border}`, borderRadius: 12, background: T.surfaceAlt, padding: 14 }}>
-        <div style={{ color: T.text, fontFamily: FONTS.display, fontWeight: 700, marginBottom: 8 }}>Task Board</div>
+        <div style={{ color: T.text, fontFamily: FONTS.sans, fontWeight: 700, marginBottom: 8 }}>Task Board</div>
         <div style={{ display: "grid", gap: 8 }}>
           {taskList.map((task) => {
             const done = !!checkedMap[task.id];
@@ -348,7 +407,7 @@ export default function RoadmapPanel({ data, loading, objective = "", onDataPatc
 
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))", gap: 12 }}>
         <div style={{ border: `1px solid ${T.border}`, borderRadius: 12, background: T.surface, padding: 14 }}>
-          <div style={{ color: T.text, fontFamily: FONTS.display, fontWeight: 700, marginBottom: 10 }}>Risks</div>
+          <div style={{ color: T.text, fontFamily: FONTS.sans, fontWeight: 700, marginBottom: 10 }}>Risks</div>
           <div style={{ display: "grid", gap: 8 }}>
             {risks.map((risk, index) => (
               <div key={`${risk}-${index}`} style={{ color: T.text, display: "flex", alignItems: "start", gap: 8 }}>
@@ -366,7 +425,7 @@ export default function RoadmapPanel({ data, loading, objective = "", onDataPatc
         </div>
 
         <div style={{ border: `1px solid ${T.border}`, borderRadius: 12, background: T.surface, padding: 14 }}>
-          <div style={{ color: T.text, fontFamily: FONTS.display, fontWeight: 700, marginBottom: 10 }}>Quick Wins</div>
+          <div style={{ color: T.text, fontFamily: FONTS.sans, fontWeight: 700, marginBottom: 10 }}>Quick Wins</div>
           <div style={{ display: "grid", gap: 8 }}>
             {quickWins.map((item, index) => (
               <div key={`${item}-${index}`} style={{ color: T.text, display: "flex", alignItems: "start", gap: 8 }}>

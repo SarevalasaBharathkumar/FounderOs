@@ -35,6 +35,42 @@ src/
 - Use Promise.all for parallel agent calls — never sequential awaits
 - OpenAI model to use: gpt-4o-mini for all agent calls
 
+## Design System (Updated)
+- Fonts: Inter or Geist (system sans-serif) — import from Google Fonts
+  NO MORE Syne or JetBrains Mono
+- Primary font stack: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif
+- Mono font (only for code/data values): 'Geist Mono', monospace
+- All colors still from src/styles/tokens.js
+
+## Page Structure (Updated)
+The app now has 2 pages managed by a simple state variable in App.jsx:
+- page === "landing"    → LandingPage component (new)
+- page === "app"        → The main FounderOS dashboard (existing)
+
+LandingPage has these sections in order:
+1. HeroSection      — AetherFlow particle canvas bg + OrbInput style input
+2. HowItWorks       — 4-step animated explanation
+3. FeaturesSection  — 4 agent feature cards with glow
+4. CTASection       — final call to action
+
+## New Components to Create
+src/components/landing/LandingPage.jsx
+src/components/landing/HeroSection.jsx
+src/components/landing/HowItWorks.jsx
+src/components/landing/FeaturesSection.jsx
+src/components/landing/CTASection.jsx
+src/components/ui/ParticleCanvas.jsx    ← AetherFlow background
+src/components/ui/AnimatedInput.jsx     ← OrbInput style
+
+## Animation Libraries Available
+framer-motion, three (already in package.json for Next.js)
+Install if missing: npm install framer-motion gsap
+
+## Functionality Rules
+- All existing agent logic, orchestrator, registry UNCHANGED
+- "use client" stays on all components using hooks
+- localStorage keys unchanged: founderos-tasks, founderos-activity, founderos-objective
+
 ## Agent JSON Contracts
 Each agent returns ONLY valid JSON — no markdown, no preamble.
 - Strategy: { title, summary, phases[{phase,goal,tasks[],kpi}], risks[], quickWins[] }

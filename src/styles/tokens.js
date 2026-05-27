@@ -1,13 +1,27 @@
 ﻿export const T = {
-  bg: "#0A0B0F", surface: "#111318", surfaceAlt: "#16181F",
-  border: "#1E2130", accent: "#5B6EF5", accentGlow: "#5B6EF520",
-  accentSoft: "#3D4FBB", green: "#22D47B", amber: "#F5A623",
-  red: "#F55B5B", text: "#E8EAF2", muted: "#6B7280", dim: "#9CA3AF"
+  bg: "#000000",
+  surface: "#0a0a0a",
+  surfaceAlt: "#111111",
+  surfaceBorder: "#1a1a1a",
+  border: "#222222",
+  accent: "#6366f1",
+  accentGlow: "rgba(99,102,241,0.15)",
+  accentBright: "#818cf8",
+  green: "#22c55e",
+  amber: "#f59e0b",
+  red: "#ef4444",
+  purple: "#a855f7",
+  text: "#ffffff",
+  textSub: "#a1a1aa",
+  muted: "#52525b",
+  dim: "#71717a",
 };
 
 export const FONTS = {
-  display: "'Syne', sans-serif",
-  mono: "'JetBrains Mono', monospace"
+  sans: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
+  mono: "'Geist Mono', 'Fira Code', monospace",
 };
 
-export const FONT_IMPORT = `@import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap');`;
+export const FONT_IMPORT = `
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+`;

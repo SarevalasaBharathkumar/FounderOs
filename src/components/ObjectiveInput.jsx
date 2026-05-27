@@ -1,5 +1,7 @@
 "use client";
+import { useEffect, useState } from "react";
 import { FONTS, T } from "../styles/tokens";
+import AnimatedInput from "./ui/AnimatedInput";
 
 const PRESETS = [
   "Validate a niche AI support agent and get first 10 paid customers.",
@@ -10,13 +12,25 @@ const PRESETS = [
 ];
 
 export default function ObjectiveInput({ objective, setObjective, onLaunch, running }) {
-  const canLaunch = !running && objective.trim().length > 0;
+  const [suggestion, setSuggestion] = useState(PRESETS[0]);
 
-  const handleKeyDown = (event) => {
-    if ((event.metaKey || event.ctrlKey) && event.key === "Enter" && canLaunch) {
-      event.preventDefault();
-      onLaunch();
-    }
+  useEffect(() => {
+    const rotate = () => setSuggestion(PRESETS[Math.floor(Math.random() * PRESETS.length)]);
+    rotate();
+    const interval = window.setInterval(rotate, 20000);
+    return () => window.clearInterval(interval);
+  }, []);
+
+  const rotateSuggestion = () => {
+    setSuggestion((prev) => {
+      const currentIndex = PRESETS.indexOf(prev);
+      if (currentIndex < 0) return PRESETS[0];
+      return PRESETS[(currentIndex + 1) % PRESETS.length];
+    });
+  };
+
+  const handleSubmit = async () => {
+    await onLaunch();
   };
 
   return (
@@ -27,7 +41,7 @@ export default function ObjectiveInput({ objective, setObjective, onLaunch, runn
       <h1
         style={{
           margin: "0 0 10px",
-          fontFamily: FONTS.display,
+          fontFamily: FONTS.sans,
           fontSize: "clamp(30px, 5vw, 50px)",
           lineHeight: 1.06,
           background: `linear-gradient(90deg, ${T.text}, ${T.accent})`,
@@ -42,71 +56,50 @@ export default function ObjectiveInput({ objective, setObjective, onLaunch, runn
         Launch your AI COO team to generate roadmap, go-to-market strategy, outreach assets, and risk register in one run.
       </p>
 
-      <div style={{ position: "relative" }}>
-        <textarea
-          value={objective}
-          onChange={(event) => setObjective(event.target.value)}
-          onKeyDown={handleKeyDown}
-          placeholder="Example: Reach $10k MRR for a B2B AI workflow tool in 90 days."
-          style={{
-            width: "100%",
-            minHeight: 168,
-            resize: "vertical",
-            borderRadius: 14,
-            border: `1px solid ${T.border}`,
-            background: T.surface,
-            color: T.text,
-            padding: "14px 14px 56px",
-            outline: "none",
-            fontSize: 15,
-            lineHeight: 1.45,
-            boxSizing: "border-box",
-          }}
-        />
+      <AnimatedInput value={objective} onChange={setObjective} onSubmit={handleSubmit} loading={running} />
+
+      <div style={{ display: "flex", justifyContent: "center", alignItems: "center", gap: 8, marginTop: 12 }}>
         <button
           type="button"
-          onClick={onLaunch}
-          disabled={!canLaunch}
+          onClick={() => setObjective(suggestion)}
           style={{
-            position: "absolute",
-            right: 10,
-            bottom: 10,
-            height: 36,
-            borderRadius: 10,
-            border: "none",
-            padding: "0 14px",
-            cursor: canLaunch ? "pointer" : "not-allowed",
-            background: canLaunch ? T.accent : T.surfaceAlt,
-            color: canLaunch ? "#fff" : T.dim,
-            fontFamily: FONTS.mono,
-            fontSize: 12,
-            fontWeight: 600,
+            background: "rgba(255,255,255,0.03)",
+            border: "1px solid rgba(255,255,255,0.07)",
+            borderRadius: 999,
+            padding: "8px 18px",
+            fontFamily: FONTS.sans,
+            fontSize: "0.8rem",
+            color: "#71717a",
+            cursor: "pointer",
+            transition: "all 0.2s ease",
+            display: "inline-flex",
+            alignItems: "center",
+            gap: 6,
           }}
         >
-          {running ? "Launching..." : "Launch (Cmd+Enter)"}
+          Suggestion: {suggestion}
         </button>
-      </div>
-
-      <div style={{ display: "flex", flexWrap: "wrap", justifyContent: "center", gap: 8, marginTop: 12 }}>
-        {PRESETS.map((preset) => (
-          <button
-            key={preset}
-            type="button"
-            onClick={() => setObjective(preset)}
-            style={{
-              borderRadius: 999,
-              border: `1px solid ${T.border}`,
-              background: T.surfaceAlt,
-              color: T.dim,
-              fontFamily: FONTS.mono,
-              fontSize: 11,
-              padding: "6px 10px",
-              cursor: "pointer",
-            }}
-          >
-            {preset}
-          </button>
-        ))}
+        <button
+          type="button"
+          onClick={rotateSuggestion}
+          aria-label="Change suggestion"
+          title="Change suggestion"
+          style={{
+            width: 30,
+            height: 30,
+            borderRadius: "50%",
+            border: "1px solid rgba(255,255,255,0.07)",
+            background: "rgba(255,255,255,0.03)",
+            color: "#71717a",
+            cursor: "pointer",
+            fontSize: "0.85rem",
+            lineHeight: 1,
+            display: "grid",
+            placeItems: "center",
+          }}
+        >
+          ↻
+        </button>
       </div>
     </section>
   );

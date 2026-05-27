@@ -1,4 +1,5 @@
 import AGENTS from "./registry";
+import { getProviderConfig } from "./provider";
 
 export async function orchestrate(objective, setAgentStates, setLog) {
   const addLog = (msg, type = "info") => {
@@ -9,6 +10,17 @@ export async function orchestrate(objective, setAgentStates, setLog) {
   };
 
   addLog("Orchestration initialized", "info");
+
+  let provider = null;
+  try {
+    provider = getProviderConfig();
+    addLog(
+      `Provider active: ${provider.provider} (${provider.keySource})`,
+      "system"
+    );
+  } catch (error) {
+    addLog(error.message, "error");
+  }
 
   const entries = Object.entries(AGENTS);
   entries.forEach(([key]) => {
@@ -24,14 +36,12 @@ export async function orchestrate(objective, setAgentStates, setLog) {
   const results = await Promise.all(
     entries.map(async ([key, agent]) => {
       try {
-        const response = await fetch("https://api.openai.com/v1/chat/completions", {
+        const activeProvider = provider || getProviderConfig();
+        const response = await fetch(activeProvider.url, {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${process.env.REACT_APP_OPENAI_KEY}`,
-          },
+          headers: activeProvider.headers,
           body: JSON.stringify({
-            model: "gpt-4o-mini",
+            model: "openai/gpt-oss-120b:free",
             messages: [
               { role: "system", content: agent.systemPrompt },
               { role: "user", content: `Startup objective: ${objective}` },

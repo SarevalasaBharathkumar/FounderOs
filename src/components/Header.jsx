@@ -1,7 +1,7 @@
 "use client";
 import { FONTS, T } from "../styles/tokens";
 
-export default function Header() {
+export default function Header({ onLogoClick, onToggleMemory }) {
   return (
     <header
       style={{
@@ -27,7 +27,11 @@ export default function Header() {
           justifyContent: "space-between",
         }}
       >
-        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+        <button
+          type="button"
+          onClick={onLogoClick}
+          style={{ display: "flex", alignItems: "center", gap: 10, background: "transparent", border: "none", cursor: "pointer", padding: 0 }}
+        >
           <div
             style={{
               width: 28,
@@ -37,17 +41,33 @@ export default function Header() {
               placeItems: "center",
               background: T.accent,
               color: "#fff",
-              fontFamily: FONTS.display,
+              fontFamily: FONTS.sans,
               fontWeight: 800,
               fontSize: 15,
             }}
           >
             F
           </div>
-          <div style={{ color: T.text, fontFamily: FONTS.display, fontWeight: 700, fontSize: 18 }}>FounderOS</div>
-        </div>
+          <div style={{ color: T.text, fontFamily: FONTS.sans, fontWeight: 700, fontSize: 18 }}>FounderOS</div>
+        </button>
 
-        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+          <button
+            type="button"
+            onClick={onToggleMemory}
+            style={{
+              border: `1px solid ${T.border}`,
+              background: T.surfaceAlt,
+              color: T.dim,
+              borderRadius: 999,
+              padding: "5px 10px",
+              fontFamily: FONTS.mono,
+              fontSize: 11,
+              cursor: "pointer",
+            }}
+          >
+            ⚡ Memory
+          </button>
           <span
             style={{
               width: 8,

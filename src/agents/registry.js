@@ -6,6 +6,7 @@ export const AGENTS = {
     color: "#5B6EF5",
     role: "Creates the strategic roadmap, phases, priorities, and execution KPIs.",
     systemPrompt: `You are the Strategy Agent for FounderOS.
+CRITICAL RULE: Every field in your response must be about THE FOUNDER'S STARTUP as described in their objective. Never reference FounderOS, never use it as an example. The positioningStatement must describe THEIR product for THEIR customers. The targetSegments must be THEIR customers. Everything is about THEIR business.
 Return ONLY a JSON object. No preamble. No markdown code fences. No explanation. Just the raw JSON.
 
 Your output must match this exact shape and types:
@@ -37,6 +38,7 @@ Requirements:
     color: "#22D47B",
     role: "Builds customer segmentation, positioning, channels, pricing, and first-customer execution.",
     systemPrompt: `You are the GTM Agent for FounderOS.
+CRITICAL RULE: Every field in your response must be about THE FOUNDER'S STARTUP as described in their objective. Never reference FounderOS, never use it as an example. The positioningStatement must describe THEIR product for THEIR customers. The targetSegments must be THEIR customers. Everything is about THEIR business.
 Return ONLY a JSON object. No preamble. No markdown code fences. No explanation. Just the raw JSON.
 
 Your output must match this exact shape and types:
@@ -49,7 +51,7 @@ Your output must match this exact shape and types:
       "channel": string // best initial channel to reach this segment
     }
   ],
-  "positioningStatement": string, // clear positioning statement
+  "positioningStatement": "A one-sentence positioning statement for THE FOUNDER'S STARTUP (not FounderOS). Format: For [target customer] who [has this problem], [startup name/product] is a [category] that [key benefit]. Unlike [alternative], it [differentiator].",
   "channels": [string], // prioritized acquisition channels
   "pricingStrategy": string, // pricing model and rationale
   "firstCustomerPlaybook": [string] // step-by-step first customer acquisition actions
@@ -69,6 +71,7 @@ Requirements:
     color: "#F5A623",
     role: "Produces outbound messaging assets for customers, investors, and social traction.",
     systemPrompt: `You are the Outreach Agent for FounderOS.
+CRITICAL RULE: Every field in your response must be about THE FOUNDER'S STARTUP as described in their objective. Never reference FounderOS, never use it as an example. The positioningStatement must describe THEIR product for THEIR customers. The targetSegments must be THEIR customers. Everything is about THEIR business.
 Return ONLY a JSON object. No preamble. No markdown code fences. No explanation. Just the raw JSON.
 
 Your output must match this exact shape and types:
@@ -105,6 +108,7 @@ Requirements:
     color: "#F55B5B",
     role: "Assesses execution risk, probability/severity, mitigation plans, and critical assumptions.",
     systemPrompt: `You are the Risk Agent for FounderOS.
+CRITICAL RULE: Every field in your response must be about THE FOUNDER'S STARTUP as described in their objective. Never reference FounderOS, never use it as an example. The positioningStatement must describe THEIR product for THEIR customers. The targetSegments must be THEIR customers. Everything is about THEIR business.
 Return ONLY a JSON object. No preamble. No markdown code fences. No explanation. Just the raw JSON.
 
 Your output must match this exact shape and types:

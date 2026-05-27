@@ -5,7 +5,9 @@ import AgentStatusRow from "./components/AgentStatusRow";
 import Console from "./components/Console";
 import FounderMemory from "./components/FounderMemory";
 import Header from "./components/Header";
+import LandingPage from "./components/landing/LandingPage";
 import ObjectiveInput from "./components/ObjectiveInput";
+import ParticleCanvas from "./components/ui/ParticleCanvas";
 import GTMPanel from "./tabs/GTMPanel";
 import OutreachPanel from "./tabs/OutreachPanel";
 import RiskPanel from "./tabs/RiskPanel";
@@ -20,6 +22,7 @@ const TABS = [
 ];
 
 export default function App() {
+  const [page, setPage] = useState("landing");
   const [objective, setObjective] = useState("");
   const [running, setRunning] = useState(false);
   const [agentStates, setAgentStates] = useState({});
@@ -35,9 +38,15 @@ export default function App() {
     [activeTab]
   );
 
-  const handleLaunch = async () => {
-    if (!objective.trim() || running) {
+  const handleLaunch = async (objectiveOverride) => {
+    const targetObjective = typeof objectiveOverride === "string" ? objectiveOverride : objective;
+    if (!targetObjective.trim() || running) {
       return;
+    }
+
+    setObjective(targetObjective);
+    if (typeof window !== "undefined") {
+      localStorage.setItem("founderos-objective", targetObjective);
     }
 
     setResults({});
@@ -48,7 +57,7 @@ export default function App() {
     setRefreshTrigger((prev) => prev + 1);
 
     try {
-      const data = await orchestrate(objective, setAgentStates, setLogs);
+      const data = await orchestrate(targetObjective, setAgentStates, setLogs);
       setResults(data || {});
     } finally {
       setRunning(false);
@@ -76,6 +85,31 @@ export default function App() {
     }
   };
 
+  const handleLandingLaunch = async (value) => {
+    setPage("app");
+    if (value?.trim()) {
+      await handleLaunch(value);
+    }
+  };
+
+  if (page === "landing") {
+    return (
+      <div
+        className="app-shell"
+        style={{
+          minHeight: "100vh",
+          background: T.bg,
+          color: T.text,
+          position: "relative",
+          overflowX: "hidden",
+        }}
+      >
+        <style>{FONT_IMPORT}</style>
+        <LandingPage onLaunch={handleLandingLaunch} />
+      </div>
+    );
+  }
+
   return (
     <div
       className="app-shell"
@@ -100,12 +134,17 @@ export default function App() {
           background-size: 22px 22px, 22px 22px;
           background-position: 0 0, 11px 11px;
           opacity: 0.22;
-          z-index: 0;
+          z-index: 1;
         }
       `}</style>
 
-      <div style={{ position: "relative", zIndex: 1, marginRight: memoryExpanded ? 260 : 0, transition: "margin-right 0.2s ease" }}>
-        <Header />
+      <ParticleCanvas />
+
+      <div style={{ position: "relative", zIndex: 2, marginRight: memoryExpanded ? 260 : 0, transition: "margin-right 0.2s ease" }}>
+        <Header
+          onLogoClick={() => setPage("landing")}
+          onToggleMemory={() => setMemoryExpanded((prev) => !prev)}
+        />
         <ObjectiveInput
           objective={objective}
           setObjective={handleObjectiveChange}
@@ -174,7 +213,12 @@ export default function App() {
           />
         </section>
       </div>
-      <FounderMemory refreshTrigger={refreshTrigger} expanded={memoryExpanded} onToggle={setMemoryExpanded} />
+      <FounderMemory
+        refreshTrigger={refreshTrigger}
+        expanded={memoryExpanded}
+        onToggle={setMemoryExpanded}
+        showFloatingToggle={false}
+      />
     </div>
   );
 }

@@ -1,13 +1,21 @@
 "use client";
 import { useEffect, useState } from "react";
-import { FONTS, T } from "../styles/tokens";
+import { FONTS } from "../styles/tokens";
 
 function formatTime(ts) {
   if (!ts) return "";
-  return new Date(ts).toLocaleTimeString();
+  const date = new Date(ts);
+  const hours = String(date.getHours()).padStart(2, "0");
+  const mins = String(date.getMinutes()).padStart(2, "0");
+  return `${hours}:${mins}`;
 }
 
-export default function FounderMemory({ refreshTrigger, expanded, onToggle }) {
+export default function FounderMemory({
+  refreshTrigger,
+  expanded,
+  onToggle,
+  showFloatingToggle = true,
+}) {
   const [objective, setObjective] = useState("");
   const [activity, setActivity] = useState([]);
   const [completedTasks, setCompletedTasks] = useState([]);
@@ -28,111 +36,124 @@ export default function FounderMemory({ refreshTrigger, expanded, onToggle }) {
     setCompletedTasks(taskNames);
   }, [refreshTrigger]);
 
-  if (!expanded) {
-    return (
-      <button
-        type="button"
-        onClick={() => onToggle(true)}
+  return (
+    <>
+      {showFloatingToggle ? (
+        <button
+          type="button"
+          onClick={() => onToggle(!expanded)}
+          style={{
+            position: "fixed",
+            right: expanded ? 280 : 0,
+            top: "50%",
+            transform: "translateY(-50%)",
+            width: 24,
+            height: 56,
+            background: "rgba(0,0,0,0.9)",
+            border: "1px solid rgba(255,255,255,0.08)",
+            borderRight: expanded ? "1px solid rgba(255,255,255,0.08)" : "none",
+            borderLeft: expanded ? "none" : "1px solid rgba(255,255,255,0.08)",
+            borderRadius: expanded ? "8px 0 0 8px" : "0 8px 8px 0",
+            cursor: "pointer",
+            color: "#52525b",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            fontSize: "0.7rem",
+            transition: "right 0.3s ease",
+            zIndex: 60,
+          }}
+        >
+          {expanded ? "›" : "‹"}
+        </button>
+      ) : null}
+
+      <aside
         style={{
           position: "fixed",
           right: 0,
-          top: "50%",
-          transform: "translateY(-50%)",
-          border: `1px solid ${T.border}`,
-          borderRight: "none",
-          borderRadius: "10px 0 0 10px",
-          background: T.surface,
-          color: T.accent,
-          padding: "10px 8px",
-          zIndex: 60,
-          cursor: "pointer",
+          top: 0,
+          height: "100vh",
+          width: expanded ? "280px" : "0px",
+          background: "rgba(0,0,0,0.95)",
+          borderLeft: "1px solid rgba(255,255,255,0.06)",
+          backdropFilter: "blur(20px)",
+          zIndex: 50,
+          transition: "width 0.3s ease, opacity 0.3s ease",
+          overflow: "hidden",
+          overflowY: "auto",
         }}
       >
-        ⚡
-      </button>
-    );
-  }
-
-  return (
-    <aside
-      style={{
-        position: "fixed",
-        right: 0,
-        top: 0,
-        width: 260,
-        height: "100vh",
-        background: T.surface,
-        borderLeft: `1px solid ${T.border}`,
-        zIndex: 50,
-        padding: "1.2rem",
-        overflowY: "auto",
-      }}
-    >
-      <button
-        type="button"
-        onClick={() => onToggle(false)}
-        style={{
-          position: "absolute",
-          top: 10,
-          right: 10,
-          border: `1px solid ${T.border}`,
-          background: T.surfaceAlt,
-          color: T.dim,
-          borderRadius: 8,
-          cursor: "pointer",
-        }}
-      >
-        ←
-      </button>
-
-      <div style={{ color: T.accent, fontFamily: FONTS.mono, fontSize: 12, letterSpacing: 0.5, textTransform: "uppercase", marginBottom: 16 }}>
-        ⚡ Founder Memory
-      </div>
-
-      <div style={{ marginBottom: 18 }}>
-        <div style={{ color: T.text, fontFamily: FONTS.display, fontWeight: 700, marginBottom: 8 }}>Current Objective</div>
-        <div style={{ color: T.dim, lineHeight: 1.45 }}>{objective || "No objective set yet."}</div>
-      </div>
-
-      <div style={{ marginBottom: 18 }}>
-        <div style={{ color: T.text, fontFamily: FONTS.display, fontWeight: 700, marginBottom: 8 }}>Today's Activity</div>
-        {activity.length === 0 ? (
-          <div style={{ color: T.dim, lineHeight: 1.45 }}>No activity yet. Launch your first objective.</div>
-        ) : (
-          <div style={{ display: "grid", gap: 8 }}>
-            {activity.map((entry, index) => {
-              const styleMap = {
-                done: { icon: "✓", color: T.green },
-                copy: { icon: "📋", color: T.amber },
-                regenerate: { icon: "🔄", color: T.accent },
-              };
-              const current = styleMap[entry.type] || { icon: "•", color: T.dim };
-              return (
-                <div key={`${entry.section}-${index}`} style={{ border: `1px solid ${T.border}`, borderRadius: 10, background: T.surfaceAlt, padding: 8 }}>
-                  <div style={{ color: current.color }}>{current.icon}</div>
-                  <div style={{ color: T.text, fontSize: 13 }}>{entry.section}</div>
-                  <div style={{ color: T.dim, fontFamily: FONTS.mono, fontSize: 11 }}>{formatTime(entry.ts)}</div>
-                </div>
-              );
-            })}
+        <div style={{ padding: "1.5rem", display: "flex", flexDirection: "column", gap: "1.5rem" }}>
+          <div
+            style={{
+              fontFamily: FONTS.sans,
+              fontSize: "0.78rem",
+              fontWeight: 700,
+              letterSpacing: "0.1em",
+              textTransform: "uppercase",
+              color: "#6366f1",
+            }}
+          >
+            ⚡ Founder Memory
           </div>
-        )}
-      </div>
 
-      <div>
-        <div style={{ color: T.text, fontFamily: FONTS.display, fontWeight: 700, marginBottom: 8 }}>Completed Tasks</div>
-        {completedTasks.length === 0 ? (
-          <div style={{ color: T.dim }}>No completed tasks yet.</div>
-        ) : (
-          <div style={{ display: "grid", gap: 6 }}>
-            {completedTasks.map((task) => (
-              <div key={task} style={{ color: T.muted, textDecoration: "line-through" }}>
-                {task}
+          <div>
+            <div style={{ fontFamily: FONTS.sans, fontSize: "0.65rem", fontWeight: 600, color: "#52525b", letterSpacing: "0.08em", textTransform: "uppercase", marginBottom: "0.5rem" }}>
+              Current Objective
+            </div>
+            <div style={{ background: "rgba(99,102,241,0.06)", border: "1px solid rgba(99,102,241,0.15)", borderRadius: 10, padding: "0.75rem", fontFamily: FONTS.sans, fontSize: "0.78rem", color: objective ? "#a1a1aa" : "#52525b", lineHeight: 1.5, fontStyle: objective ? "normal" : "italic" }}>
+              {objective || "No objective set yet."}
+            </div>
+          </div>
+
+          <div>
+            <div style={{ fontFamily: FONTS.sans, fontSize: "0.65rem", fontWeight: 600, color: "#52525b", letterSpacing: "0.08em", textTransform: "uppercase", marginBottom: "0.5rem" }}>
+              Today's Activity
+            </div>
+            {activity.length === 0 ? (
+              <div style={{ fontFamily: FONTS.sans, fontSize: "0.75rem", color: "#3f3f46", fontStyle: "italic", textAlign: "center", padding: "1rem 0" }}>
+                No activity yet.
               </div>
-            ))}
+            ) : (
+              <div style={{ display: "flex", flexDirection: "column" }}>
+                {activity.map((entry, index) => (
+                  <div key={`${entry.section}-${index}`} style={{ display: "flex", gap: 8, padding: "6px 0", borderBottom: index < activity.length - 1 ? "1px solid rgba(255,255,255,0.04)" : "none", alignItems: "flex-start" }}>
+                    <span style={{ flexShrink: 0, fontSize: "0.9rem" }}>
+                      {entry.type === "done" ? "✓" : entry.type === "copy" ? "📋" : entry.type === "regenerate" ? "🔄" : "•"}
+                    </span>
+                    <span style={{ fontFamily: FONTS.sans, fontSize: "0.72rem", color: "#71717a", lineHeight: 1.4, flex: 1 }}>
+                      {entry.section}
+                    </span>
+                    <span style={{ fontFamily: FONTS.sans, fontSize: "0.62rem", color: "#3f3f46", flexShrink: 0 }}>
+                      {formatTime(entry.ts)}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
-        )}
-      </div>
-    </aside>
+
+          <div>
+            <div style={{ fontFamily: FONTS.sans, fontSize: "0.65rem", fontWeight: 600, color: "#52525b", letterSpacing: "0.08em", textTransform: "uppercase", marginBottom: "0.5rem" }}>
+              Completed Tasks
+            </div>
+            {completedTasks.length === 0 ? (
+              <div style={{ fontFamily: FONTS.sans, fontSize: "0.75rem", color: "#3f3f46", fontStyle: "italic", textAlign: "center", padding: "1rem 0" }}>
+                No completed tasks yet.
+              </div>
+            ) : (
+              <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+                {completedTasks.map((task) => (
+                  <div key={task} style={{ fontFamily: FONTS.sans, fontSize: "0.72rem", color: "#3f3f46", textDecoration: "line-through", lineHeight: 1.4 }}>
+                    {task}
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      </aside>
+    </>
   );
 }
