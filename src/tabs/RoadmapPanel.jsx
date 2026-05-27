@@ -2,6 +2,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useRef } from "react";
 import { callAdvisorFollowup, callAgentWithPrompt, getTaskStorage, pushActivity, setTaskStorage } from "../agents/interactive";
+import ActionBar from "../components/automations/ActionBar";
 import { FONTS, T } from "../styles/tokens";
 
 const skeletonStyle = {
@@ -444,6 +445,7 @@ export default function RoadmapPanel({ data, loading, objective = "", onDataPatc
       </div>
 
       <PanelChat data={panelData} objective={objective} onAction={onActionTrigger} />
+      <ActionBar agentId="strategist" data={data} objective={objective} />
     </div>
   );
 }

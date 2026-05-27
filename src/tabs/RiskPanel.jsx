@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
 import { callAdvisorFollowup, callAgentWithPrompt, pushActivity } from "../agents/interactive";
+import ActionBar from "../components/automations/ActionBar";
 import { FONTS, T } from "../styles/tokens";
 
 const skeletonStyle = {
@@ -313,6 +314,7 @@ export default function RiskPanel({ data, loading, objective = "", onDataPatch, 
       </div>
 
       <PanelChat data={panelData} objective={objective} onAction={onActionTrigger} />
+      <ActionBar agentId="risk" data={data} objective={objective} />
     </div>
   );
 }

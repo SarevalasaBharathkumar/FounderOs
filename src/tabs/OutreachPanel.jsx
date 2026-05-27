@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
 import { callAdvisorFollowup, callAgentWithPrompt, pushActivity } from "../agents/interactive";
+import ActionBar from "../components/automations/ActionBar";
 import { FONTS, T } from "../styles/tokens";
 
 const skeletonStyle = {
@@ -274,6 +275,7 @@ export default function OutreachPanel({ data, loading, objective = "", onDataPat
       </div>
 
       <PanelChat data={panelData} objective={objective} onAction={onActionTrigger} />
+      <ActionBar agentId="outreach" data={data} objective={objective} />
     </div>
   );
 }

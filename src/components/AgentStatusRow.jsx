@@ -87,10 +87,10 @@ export default function AgentStatusRow({ agentStates }) {
 
           // Apply state-specific styling
           if (state.status === "running") {
-            cardStyle.borderColor = `${agent.color}66`;
+            cardStyle.border = `1px solid ${agent.color}66`;
             cardStyle.boxShadow = `0 0 30px ${agent.color}26`;
           } else if (state.status === "done") {
-            cardStyle.borderColor = "rgba(34,197,94,0.3)";
+            cardStyle.border = "1px solid rgba(34,197,94,0.3)";
             cardStyle.background = "rgba(34,197,94,0.04)";
           }
 

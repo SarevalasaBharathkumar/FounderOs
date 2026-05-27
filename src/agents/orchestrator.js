@@ -1,6 +1,27 @@
 import AGENTS from "./registry";
 import { getProviderConfig } from "./provider";
 
+function safeParseJson(content) {
+  if (!content) {
+    return null;
+  }
+
+  const cleaned = content.replace(/```json|```/g, "").trim();
+  try {
+    return JSON.parse(cleaned);
+  } catch {
+    const objectMatch = cleaned.match(/\{[\s\S]*\}$/);
+    if (!objectMatch) {
+      return null;
+    }
+    try {
+      return JSON.parse(objectMatch[0]);
+    } catch {
+      return null;
+    }
+  }
+}
+
 export async function orchestrate(objective, setAgentStates, setLog) {
   const addLog = (msg, type = "info") => {
     setLog((prev) => [
@@ -63,7 +84,10 @@ export async function orchestrate(objective, setAgentStates, setLog) {
           throw new Error("Missing model response content");
         }
 
-        const parsed = JSON.parse(raw.replace(/```json|```/g, "").trim());
+        const parsed = safeParseJson(raw);
+        if (!parsed) {
+          throw new Error("Invalid JSON returned by model");
+        }
 
         setAgentStates((state) => ({
           ...state,

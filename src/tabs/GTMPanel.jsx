@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
 import { callAdvisorFollowup, callAgentWithPrompt, pushActivity } from "../agents/interactive";
+import ActionBar from "../components/automations/ActionBar";
 import { FONTS, T } from "../styles/tokens";
 
 const skeletonStyle = {
@@ -322,6 +323,7 @@ export default function GTMPanel({ data, loading, objective = "", onDataPatch, o
       </div>
 
       <PanelChat data={panelData} objective={objective} onAction={onActionTrigger} />
+      <ActionBar agentId="gtm" data={data} objective={objective} />
     </div>
   );
 }
