@@ -52,10 +52,39 @@ function ExportNotionModal({ markdown, onClose }) {
   };
 
   return (
-    <div style={{ position: "fixed", inset: 0, zIndex: 1000, background: "rgba(0,0,0,0.95)", color: "#ffffff" }}>
-      <div style={{ maxWidth: 960, margin: "40px auto", padding: 16, display: "grid", gap: 14 }}>
-        <div style={{ fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, sans-serif", fontWeight: 700, fontSize: "1.1rem" }}>
-          Export to Notion
+    <div
+      style={{
+        position: "fixed",
+        inset: 0,
+        zIndex: 1000,
+        background: "rgba(0,0,0,0.95)",
+        color: "#ffffff",
+        overflowY: "auto",
+        padding: "20px 16px",
+      }}
+    >
+      <div style={{ maxWidth: 960, margin: "0 auto", display: "grid", gap: 14 }}>
+        <div
+          style={{
+            position: "sticky",
+            top: 0,
+            zIndex: 5,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            gap: 10,
+            padding: "10px 12px",
+            border: "1px solid rgba(255,255,255,0.15)",
+            borderRadius: 12,
+            background: "rgba(15,15,18,0.92)",
+            backdropFilter: "blur(8px)",
+            WebkitBackdropFilter: "blur(8px)",
+          }}
+        >
+          <div style={{ fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, sans-serif", fontWeight: 700, fontSize: "1.1rem" }}>
+            Export to Notion
+          </div>
+          <button type="button" onClick={onClose} style={modalButtonStyle}>Close</button>
         </div>
 
         <div style={boxStyle}>
@@ -65,12 +94,12 @@ function ExportNotionModal({ markdown, onClose }) {
             value={markdown || ""}
             style={{ width: "100%", minHeight: 220, background: "#0a0a0a", color: "#ffffff", border: "1px solid rgba(255,255,255,0.15)", borderRadius: 10, padding: 10, resize: "vertical" }}
           />
-          <button type="button" onClick={copyAll} style={modalButtonStyle}>?? Copy All</button>
+          <button type="button" onClick={copyAll} style={modalButtonStyle}>Copy All</button>
         </div>
 
         <div style={boxStyle}>
           <div style={boxTitleStyle}>Paste into Notion</div>
-          <div style={{ opacity: 0.9 }}>Open Notion ? New page ? Type /markdown ? Paste</div>
+          <div style={{ opacity: 0.9 }}>Open Notion {"->"} New page {"->"} Type /markdown {"->"} Paste</div>
         </div>
 
         <div style={boxStyle}>
@@ -82,8 +111,8 @@ const notion = new Client({ auth: 'YOUR_TOKEN' })
         </div>
 
         <div style={{ display: "flex", gap: 8, justifyContent: "flex-end" }}>
-          <button type="button" onClick={downloadMarkdown} style={modalButtonStyle}>? Download .md</button>
-          <button type="button" onClick={onClose} style={modalButtonStyle}>? Close</button>
+          <button type="button" onClick={downloadMarkdown} style={modalButtonStyle}>Download .md</button>
+          <button type="button" onClick={onClose} style={modalButtonStyle}>Close</button>
         </div>
       </div>
     </div>

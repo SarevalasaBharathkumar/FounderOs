@@ -8,9 +8,6 @@ import GenerateICPSheetButton from "./buttons/GenerateICPSheetButton";
 import GenerateLandingPageButton from "./buttons/GenerateLandingPageButton";
 import CopyPositioningButton from "./buttons/CopyPositioningButton";
 import OpenInGmailButton from "./buttons/OpenInGmailButton";
-import CopyEmailSequenceButton from "./buttons/CopyEmailSequenceButton";
-import CopyInvestorPitchButton from "./buttons/CopyInvestorPitchButton";
-import CopyTwitterThreadButton from "./buttons/CopyTwitterThreadButton";
 import DownloadRiskRegisterButton from "./buttons/DownloadRiskRegisterButton";
 import GenerateValidationChecklistButton from "./buttons/GenerateValidationChecklistButton";
 import CopyDiscoveryScriptButton from "./buttons/CopyDiscoveryScriptButton";
@@ -74,9 +71,6 @@ function ActionBar({ agentId, data, objective }) {
     outreach: [
       <GeneratePitchDeckButton key="generate-pitch-deck" data={data} objective={objective} />,
       <OpenInGmailButton key="open-in-gmail" data={data} />,
-      <CopyEmailSequenceButton key="copy-email-sequence" data={data} />,
-      <CopyInvestorPitchButton key="copy-investor-pitch" data={data} />,
-      <CopyTwitterThreadButton key="copy-twitter-thread" data={data} />,
     ],
     risk: [
       <DownloadRiskRegisterButton key="download-risk-register" data={data} objective={objective} />,

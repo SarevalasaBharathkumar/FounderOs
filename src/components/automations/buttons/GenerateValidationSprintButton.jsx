@@ -3,6 +3,7 @@
 import { useState } from "react";
 import ActionButton from "../ActionButton";
 import callOpenRouter from "../../../lib/openrouter";
+import SimpleMarkdown from "../../ui/SimpleMarkdown";
 
 function ValidationSprintPreview({ markdown, onClose }) {
   const copyText = async () => {
@@ -36,13 +37,13 @@ function ValidationSprintPreview({ markdown, onClose }) {
           7-Day Validation Sprint
         </div>
         <div style={{ display: "flex", gap: 8 }}>
-          <button type="button" onClick={copyText} style={modalButtonStyle}>?? Copy</button>
-          <button type="button" onClick={downloadMarkdown} style={modalButtonStyle}>? Download as .md</button>
-          <button type="button" onClick={onClose} style={modalButtonStyle}>? Close</button>
+          <button type="button" onClick={copyText} style={modalButtonStyle}>Copy</button>
+          <button type="button" onClick={downloadMarkdown} style={modalButtonStyle}>Download .md</button>
+          <button type="button" onClick={onClose} style={modalButtonStyle}>Close</button>
         </div>
       </div>
-      <div style={{ height: "calc(100vh - 60px)", overflowY: "auto", padding: 20, color: "#ffffff", fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, sans-serif", whiteSpace: "pre-wrap", lineHeight: 1.6 }}>
-        {markdown}
+      <div style={{ height: "calc(100vh - 60px)", overflowY: "auto", padding: 20, color: "#ffffff", fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, sans-serif" }}>
+        <SimpleMarkdown text={markdown} />
       </div>
     </div>
   );
@@ -68,9 +69,9 @@ function GenerateValidationSprintButton({ data, objective }) {
       systemPrompt: "You are a lean startup coach. Create a 7-day validation sprint plan. Return ONLY clean markdown, no code fences.",
       userMessage: `
 Objective: ${objective}
-Top risks to validate: ${data.risks?.join(", ")}
-Quick wins available: ${data.quickWins?.join(", ")}
-Phase 1 goal: ${data.phases?.[0]?.goal}
+Top risks to validate: ${Array.isArray(data?.risks) ? data.risks.map((r) => (typeof r === "string" ? r : r?.risk || r?.category || "")).filter(Boolean).join(", ") : ""}
+Quick wins available: ${Array.isArray(data?.quickWins) ? data.quickWins.join(", ") : ""}
+Phase 1 goal: ${data?.phases?.[0]?.goal || ""}
 
 Create a 7-day validation sprint:
 - Day 1-2: Customer Discovery (include 5 specific interview questions)

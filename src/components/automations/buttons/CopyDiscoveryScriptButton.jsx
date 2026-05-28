@@ -15,6 +15,22 @@ const modalButtonStyle = {
   fontSize: "0.78rem",
 };
 
+function renderStructuredText(text) {
+  return String(text || "")
+    .split("\n")
+    .map((line, idx) => {
+      const trimmed = line.trim();
+      if (!trimmed) return <div key={`gap-${idx}`} style={{ height: 8 }} />;
+      if (/^\d+\./.test(trimmed)) {
+        return <div key={`n-${idx}`} style={{ color: "#ffffff", fontWeight: 700, marginTop: 10 }}>{trimmed}</div>;
+      }
+      if (/^[-*]\s+/.test(trimmed)) {
+        return <div key={`b-${idx}`} style={{ color: "#d4d4d8", marginLeft: 10, lineHeight: 1.6 }}>{`• ${trimmed.replace(/^[-*]\s+/, "")}`}</div>;
+      }
+      return <div key={`p-${idx}`} style={{ color: "#e4e4e7", lineHeight: 1.65 }}>{trimmed}</div>;
+    });
+}
+
 function ScriptPreview({ text, onClose }) {
   const copyText = async () => {
     await navigator.clipboard.writeText(text || "");
@@ -52,8 +68,8 @@ function ScriptPreview({ text, onClose }) {
           <button type="button" onClick={onClose} style={modalButtonStyle}>✕ Close</button>
         </div>
       </div>
-      <div style={{ height: "calc(100vh - 60px)", overflowY: "auto", padding: 20, color: "#ffffff", fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, sans-serif", whiteSpace: "pre-wrap", lineHeight: 1.6 }}>
-        {text}
+      <div style={{ height: "calc(100vh - 60px)", overflowY: "auto", padding: 20, color: "#ffffff", fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, sans-serif" }}>
+        {renderStructuredText(text)}
       </div>
     </div>
   );

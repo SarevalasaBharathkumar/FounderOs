@@ -3,6 +3,7 @@
 import { useState } from "react";
 import ActionButton from "../ActionButton";
 import callOpenRouter from "../../../lib/openrouter";
+import SimpleMarkdown from "../../ui/SimpleMarkdown";
 
 const modalButtonStyle = {
   border: "1px solid rgba(255,255,255,0.2)",
@@ -52,8 +53,8 @@ function ChecklistPreview({ markdown, onClose }) {
           <button type="button" onClick={onClose} style={modalButtonStyle}>✕ Close</button>
         </div>
       </div>
-      <div style={{ height: "calc(100vh - 60px)", overflowY: "auto", padding: 20, color: "#ffffff", fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, sans-serif", whiteSpace: "pre-wrap", lineHeight: 1.6 }}>
-        {markdown}
+      <div style={{ height: "calc(100vh - 60px)", overflowY: "auto", padding: 20, color: "#ffffff", fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, sans-serif" }}>
+        <SimpleMarkdown text={markdown} />
       </div>
     </div>
   );

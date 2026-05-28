@@ -23,17 +23,22 @@ const actionBase = {
   cursor: "pointer",
 };
 
-function SectionActions({ sectionName, sectionText, onRegenerate, onAction }) {
-  const [copied, setCopied] = useState(false);
-  const [done, setDone] = useState(false);
+const copyIconBtn = {
+  border: `1px solid ${T.border}`,
+  background: T.surface,
+  borderRadius: 8,
+  color: T.textSub,
+  fontSize: "0.75rem",
+  width: 28,
+  height: 28,
+  cursor: "pointer",
+  display: "grid",
+  placeItems: "center",
+  flexShrink: 0,
+};
 
-  const copySection = async () => {
-    await navigator.clipboard.writeText(sectionText || "");
-    setCopied(true);
-    pushActivity("copy", sectionName);
-    onAction?.();
-    setTimeout(() => setCopied(false), 1500);
-  };
+function SectionActions({ sectionName, onRegenerate, onAction }) {
+  const [done, setDone] = useState(false);
 
   const markDone = () => {
     setDone(true);
@@ -44,14 +49,11 @@ function SectionActions({ sectionName, sectionText, onRegenerate, onAction }) {
   return (
     <div style={{ display: "flex", gap: 6, justifyContent: "flex-end", marginTop: 10, position: "relative" }}>
       {done ? <span style={{ position: "absolute", top: -40, right: 0, color: T.green, fontSize: 18 }}>✓</span> : null}
-      <button type="button" onClick={copySection} style={actionBase}>
-        {copied ? "Copied!" : "📋 Copy"}
-      </button>
       <button type="button" onClick={onRegenerate} style={actionBase}>
-        🔄 Regenerate
+        Regenerate
       </button>
       <button type="button" onClick={markDone} style={actionBase}>
-        ✓ Done
+        Done
       </button>
     </div>
   );
@@ -116,7 +118,7 @@ function PanelChat({ data, objective, onAction }) {
           disabled={!busy && !input.trim()}
           style={{ ...actionBase, fontSize: "0.75rem", minWidth: 46 }}
         >
-          {busy ? "■" : "Send"}
+          {busy ? "Stop" : "Send"}
         </button>
       </div>
       <div style={{ display: "flex", flexDirection: "column", gap: 10, maxHeight: 400, overflowY: "auto", padding: "1rem 0" }}>
@@ -156,14 +158,6 @@ function PanelChat({ data, objective, onAction }) {
             {item.content}
           </div>
         ))}
-        {busy ? (
-          <div style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.07)", borderRadius: "12px 12px 12px 2px", padding: "10px 14px", maxWidth: "85%", alignSelf: "flex-start", display: "inline-flex", gap: 6, alignItems: "center" }}>
-            {[0, 1, 2].map((dot) => (
-              <span key={dot} style={{ width: 6, height: 6, borderRadius: "50%", background: "#a1a1aa", animation: `typingPulse 1s ${dot * 0.2}s infinite ease-in-out`, display: "inline-block" }} />
-            ))}
-            <style>{`@keyframes typingPulse {0%,100%{transform:scale(0.8);opacity:0.55;}50%{transform:scale(1.15);opacity:1;}}`}</style>
-          </div>
-        ) : null}
       </div>
     </div>
   );
@@ -210,29 +204,24 @@ export default function OutreachPanel({ data, loading, objective = "", onDataPat
       <div style={{ minHeight: 260, display: "grid", placeItems: "center", textAlign: "center", border: `1px dashed ${T.border}`, borderRadius: 14, background: T.surface, color: T.dim, padding: 24 }}>
         <div>
           <div style={{ fontSize: 34, opacity: 0.35, marginBottom: 10 }}>⚡</div>
-          <div style={{ fontFamily: FONTS.sans, fontSize: 16 }}>Run an objective to see your roadmap</div>
+          <div style={{ fontFamily: FONTS.sans, fontSize: 16 }}>Run an objective to see your outreach outputs</div>
         </div>
       </div>
     );
   }
 
-  const emails = Array.isArray(panelData.coldEmailSequence) ? panelData.coldEmailSequence.slice(0, 3) : [];
+  const emails = Array.isArray(panelData.coldEmailSequence) ? panelData.coldEmailSequence : [];
   const linkedInMessage = panelData.linkedInMessage || "";
   const investorPitch = panelData.investorPitch || {};
-  const ACCENT = T.accent;
-  const RED = T.red;
-  const GREEN = T.green;
-  const AMBER = T.amber;
-  const ACCENT2 = T.purple;
   const pitchFields = [
-    { key: "hook", label: "Hook", color: ACCENT },
-    { key: "problem", label: "Problem", color: RED },
-    { key: "solution", label: "Solution", color: GREEN },
-    { key: "marketOpportunity", label: "Market Opportunity", color: AMBER },
-    { key: "traction", label: "Traction", color: GREEN },
-    { key: "businessModel", label: "Business Model", color: ACCENT2 },
-    { key: "whyUs", label: "Why Us", color: ACCENT },
-    { key: "ask", label: "The Ask", color: RED },
+    { key: "hook", label: "Hook", color: T.accent },
+    { key: "problem", label: "Problem", color: T.red },
+    { key: "solution", label: "Solution", color: T.green },
+    { key: "marketOpportunity", label: "Market Opportunity", color: T.amber },
+    { key: "traction", label: "Traction", color: T.green },
+    { key: "businessModel", label: "Business Model", color: T.purple },
+    { key: "whyUs", label: "Why Us", color: T.accent },
+    { key: "ask", label: "The Ask", color: T.red },
   ];
   const thread = Array.isArray(panelData.twitterThread) ? panelData.twitterThread : [];
 
@@ -243,23 +232,48 @@ export default function OutreachPanel({ data, loading, objective = "", onDataPat
           <div style={{ border: `1px solid ${T.border}`, borderRadius: 12, background: T.surface, padding: 14 }}>
             {emails.map((email, index) => (
               <div key={`${email.subject || "email"}-${index}`} style={{ border: `1px solid ${T.border}`, borderRadius: 12, background: T.surfaceAlt, padding: 14, marginBottom: 8 }}>
-                <div style={{ fontFamily: FONTS.mono, color: T.amber, fontSize: 12, marginBottom: 6 }}>Day {email.day}</div>
-                <div style={{ color: T.text, fontFamily: FONTS.sans, fontWeight: 700, marginBottom: 8 }}>{email.subject}</div>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
+                  <div style={{ fontFamily: FONTS.mono, color: T.amber, fontSize: 12 }}>Day {email.day || index + 1}</div>
+                  <button
+                    type="button"
+                    title="Copy this email"
+                    aria-label={`Copy email day ${email.day || index + 1}`}
+                    onClick={() => navigator.clipboard.writeText(`Day ${email.day || index + 1}\nSubject: ${email.subject || ""}\n\n${email.body || ""}`)}
+                    style={copyIconBtn}
+                  >
+                    ⧉
+                  </button>
+                </div>
+                <div style={{ color: T.text, fontFamily: FONTS.sans, fontWeight: 700, marginBottom: 8, whiteSpace: "pre-wrap" }}>{email.subject}</div>
                 <div style={{ color: T.dim, lineHeight: 1.5, whiteSpace: "pre-wrap" }}>{email.body}</div>
               </div>
             ))}
-            <SectionActions sectionName="Cold Email Sequence" sectionText={JSON.stringify(emails)} onRegenerate={() => regenerate("Cold Email Sequence")} onAction={onActionTrigger} />
+            <SectionActions sectionName="Cold Email Sequence" onRegenerate={() => regenerate("Cold Email Sequence")} onAction={onActionTrigger} />
           </div>
 
           <div style={{ border: `1px solid ${T.border}`, borderRadius: 12, background: T.surfaceAlt, padding: 14 }}>
             <div style={{ color: T.text, fontFamily: FONTS.sans, fontWeight: 700, marginBottom: 8 }}>LinkedIn DM</div>
             <div style={{ color: T.dim, lineHeight: 1.5, whiteSpace: "pre-wrap" }}>{linkedInMessage}</div>
-            <SectionActions sectionName="LinkedIn DM" sectionText={linkedInMessage} onRegenerate={() => regenerate("LinkedIn DM")} onAction={onActionTrigger} />
+            <SectionActions sectionName="LinkedIn DM" onRegenerate={() => regenerate("LinkedIn DM")} onAction={onActionTrigger} />
           </div>
         </div>
 
         <div style={{ border: `1px solid ${T.border}`, borderRadius: 12, background: T.surface, padding: 14, display: "grid", gap: 10, alignContent: "start" }}>
-          <div style={{ color: T.text, fontFamily: FONTS.sans, fontWeight: 700 }}>Investor Pitch</div>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+            <div style={{ color: T.text, fontFamily: FONTS.sans, fontWeight: 700 }}>Investor Pitch</div>
+            <button
+              type="button"
+              title="Copy investor pitch"
+              aria-label="Copy investor pitch"
+              onClick={() => {
+                const text = pitchFields.map((field) => `${field.label}: ${investorPitch[field.key] || ""}`).join("\n\n");
+                navigator.clipboard.writeText(text);
+              }}
+              style={copyIconBtn}
+            >
+              ⧉
+            </button>
+          </div>
           <div style={{ border: `1px solid ${T.border}`, borderRadius: 10, background: T.surfaceAlt, padding: "0 12px" }}>
             {pitchFields.map((field, index) => (
               <div
@@ -269,23 +283,14 @@ export default function OutreachPanel({ data, loading, objective = "", onDataPat
                   borderBottom: index < pitchFields.length - 1 ? "1px solid rgba(255,255,255,0.05)" : "none",
                 }}
               >
-                <div
-                  style={{
-                    fontFamily: FONTS.mono,
-                    fontSize: "0.62rem",
-                    textTransform: "uppercase",
-                    color: field.color,
-                    letterSpacing: "0.08em",
-                    marginBottom: "0.35rem",
-                  }}
-                >
+                <div style={{ fontFamily: FONTS.mono, fontSize: "0.62rem", textTransform: "uppercase", color: field.color, letterSpacing: "0.08em", marginBottom: "0.35rem" }}>
                   {field.label}
                 </div>
-                <div style={{ fontSize: "0.85rem", color: T.text, lineHeight: 1.6 }}>{investorPitch[field.key] || ""}</div>
+                <div style={{ fontSize: "0.85rem", color: T.text, lineHeight: 1.6, whiteSpace: "pre-wrap" }}>{investorPitch[field.key] || ""}</div>
               </div>
             ))}
           </div>
-          <SectionActions sectionName="Investor Pitch" sectionText={JSON.stringify(investorPitch)} onRegenerate={() => regenerate("Investor Pitch")} onAction={onActionTrigger} />
+          <SectionActions sectionName="Investor Pitch" onRegenerate={() => regenerate("Investor Pitch")} onAction={onActionTrigger} />
         </div>
       </div>
 
@@ -295,11 +300,22 @@ export default function OutreachPanel({ data, loading, objective = "", onDataPat
           {thread.map((tweet, index) => (
             <div key={`${tweet}-${index}`} style={{ display: "grid", gridTemplateColumns: "72px 1fr", alignItems: "start", gap: 10, border: `1px solid ${T.border}`, borderRadius: 10, background: T.surfaceAlt, padding: 10 }}>
               <div style={{ color: T.accent, fontFamily: FONTS.mono, fontSize: 12 }}>{`Tweet ${index + 1}`}</div>
-              <div style={{ color: T.text, lineHeight: 1.45 }}>{tweet}</div>
+              <div style={{ display: "grid", gridTemplateColumns: "1fr auto", gap: 10 }}>
+                <div style={{ color: T.text, lineHeight: 1.45, whiteSpace: "pre-wrap" }}>{tweet}</div>
+                <button
+                  type="button"
+                  title={`Copy tweet ${index + 1}`}
+                  aria-label={`Copy tweet ${index + 1}`}
+                  onClick={() => navigator.clipboard.writeText(tweet || "")}
+                  style={copyIconBtn}
+                >
+                  ⧉
+                </button>
+              </div>
             </div>
           ))}
         </div>
-        <SectionActions sectionName="Twitter Thread" sectionText={thread.join("\n")} onRegenerate={() => regenerate("Twitter Thread")} onAction={onActionTrigger} />
+        <SectionActions sectionName="Twitter Thread" onRegenerate={() => regenerate("Twitter Thread")} onAction={onActionTrigger} />
       </div>
 
       <PanelChat data={panelData} objective={objective} onAction={onActionTrigger} />
