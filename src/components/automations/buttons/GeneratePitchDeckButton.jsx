@@ -525,6 +525,10 @@ All content specific to this startup. No generic placeholders.`,
 
   const currentSlide = editableSlides?.[activeSlide] || null;
   const typeColor = TYPE_COLORS[currentSlide?.type] || "#6366F1";
+  const statLength = String(currentSlide?.stat || "").length;
+  const statFontSize = statLength > 18 ? "1.55rem" : statLength > 12 ? "1.95rem" : "2.55rem";
+  const titleLength = String(currentSlide?.title || "").length;
+  const titleFontSize = titleLength > 80 ? "1.7rem" : titleLength > 55 ? "2rem" : "2.5rem";
 
   const saveEdit = () => {
     setEditing(false);
@@ -754,10 +758,10 @@ All content specific to this startup. No generic placeholders.`,
                               {`Slide ${activeSlide + 1} of ${(editableSlides || []).length}`}
                             </span>
                           </div>
-                          <div style={{ marginTop: "0.9rem", fontFamily: "Inter, -apple-system, BlinkMacSystemFont, sans-serif", fontWeight: 800, fontSize: "2.5rem", color: "#fff", letterSpacing: "-0.03em", lineHeight: 1.1, maxWidth: currentSlide.stat ? "70%" : "100%" }}>
+                          <div style={{ marginTop: "0.9rem", fontFamily: "Inter, -apple-system, BlinkMacSystemFont, sans-serif", fontWeight: 800, fontSize: titleFontSize, color: "#fff", letterSpacing: "-0.03em", lineHeight: 1.1, maxWidth: currentSlide.stat ? "64%" : "100%", overflowWrap: "anywhere" }}>
                             {currentSlide.title}
                           </div>
-                          <div style={{ marginTop: "0.45rem", fontFamily: "Inter, -apple-system, BlinkMacSystemFont, sans-serif", fontWeight: 400, fontSize: "1.12rem", color: "#a1a1aa", lineHeight: 1.4, maxWidth: currentSlide.stat ? "70%" : "100%" }}>
+                          <div style={{ marginTop: "0.45rem", fontFamily: "Inter, -apple-system, BlinkMacSystemFont, sans-serif", fontWeight: 400, fontSize: "1.12rem", color: "#a1a1aa", lineHeight: 1.4, maxWidth: currentSlide.stat ? "64%" : "100%", overflowWrap: "anywhere" }}>
                             {currentSlide.subtitle}
                           </div>
 
@@ -778,22 +782,23 @@ All content specific to this startup. No generic placeholders.`,
                                 flexDirection: "column",
                                 padding: "0.8rem",
                                 textAlign: "center",
+                                overflow: "hidden",
                               }}
                             >
-                              <span style={{ fontFamily: "Inter, -apple-system, BlinkMacSystemFont, sans-serif", fontWeight: 900, fontSize: "2.55rem", color: "#fff", lineHeight: 1.05 }}>
+                              <span style={{ fontFamily: "Inter, -apple-system, BlinkMacSystemFont, sans-serif", fontWeight: 900, fontSize: statFontSize, color: "#fff", lineHeight: 1.05, maxWidth: "100%", overflowWrap: "anywhere" }}>
                                 {currentSlide.stat}
                               </span>
-                              <span style={{ marginTop: 6, fontFamily: "Inter, -apple-system, BlinkMacSystemFont, sans-serif", fontWeight: 400, fontSize: "0.95rem", color: "#d4d4d8" }}>
+                              <span style={{ marginTop: 6, fontFamily: "Inter, -apple-system, BlinkMacSystemFont, sans-serif", fontWeight: 400, fontSize: "0.95rem", color: "#d4d4d8", maxWidth: "100%", overflowWrap: "anywhere" }}>
                                 {currentSlide.statLabel}
                               </span>
                             </div>
                           ) : null}
 
-                          <div style={{ marginTop: "1rem", maxWidth: currentSlide.stat ? "70%" : "100%" }}>
+                          <div style={{ marginTop: "1rem", maxWidth: currentSlide.stat ? "64%" : "100%", maxHeight: currentSlide.stat ? "52%" : "unset", overflow: "hidden" }}>
                             {(currentSlide.bullets || []).map((b, idx) => (
                               <div key={idx} style={{ display: "flex", alignItems: "flex-start", gap: 10, marginBottom: 10 }}>
                                 <span style={{ width: 8, height: 8, borderRadius: "50%", background: typeColor, flexShrink: 0, marginTop: 7, boxShadow: `0 0 6px ${typeColor}` }} />
-                                <span style={{ fontFamily: "Inter, -apple-system, BlinkMacSystemFont, sans-serif", fontWeight: 400, fontSize: "1.1rem", color: "#d4d4d8", lineHeight: 1.4 }}>
+                                <span style={{ fontFamily: "Inter, -apple-system, BlinkMacSystemFont, sans-serif", fontWeight: 400, fontSize: "1.04rem", color: "#d4d4d8", lineHeight: 1.35, overflowWrap: "anywhere" }}>
                                   {b}
                                 </span>
                               </div>
