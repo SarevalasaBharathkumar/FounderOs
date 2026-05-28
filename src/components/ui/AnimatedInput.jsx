@@ -7,22 +7,32 @@ export default function AnimatedInput({
   value,
   onChange,
   onSubmit,
-  placeholder = "Describe your startup objective...",
+  placeholder = "Describe your idea...",
   loading = false,
 }) {
-  const [displayPlaceholder, setDisplayPlaceholder] = useState(placeholder);
-  const placeholderList = [
-    "Describe your startup objective...",
-    "What problem are you solving?",
-    "Who is your target customer?",
-    "What does success look like in 90 days?",
-  ];
+  void placeholder;
+  const TYPING_PLACEHOLDER = "Describe your idea...";
+  const [displayPlaceholder, setDisplayPlaceholder] = useState("");
 
   useEffect(() => {
-    setDisplayPlaceholder(placeholderList[Math.floor(Math.random() * placeholderList.length)]);
+    let charIndex = 0;
+    let forward = true;
+
     const interval = window.setInterval(() => {
-      setDisplayPlaceholder(placeholderList[Math.floor(Math.random() * placeholderList.length)]);
-    }, 20000);
+      if (forward) {
+        charIndex += 1;
+        if (charIndex >= TYPING_PLACEHOLDER.length) {
+          forward = false;
+        }
+      } else {
+        charIndex -= 1;
+        if (charIndex <= 0) {
+          forward = true;
+        }
+      }
+      setDisplayPlaceholder(TYPING_PLACEHOLDER.slice(0, Math.max(0, charIndex)));
+    }, 85);
+
     return () => window.clearInterval(interval);
   }, []);
 
@@ -33,7 +43,7 @@ export default function AnimatedInput({
   };
 
   const handleKeyDown = (e) => {
-    if ((e.metaKey || e.ctrlKey) && e.key === "Enter") {
+    if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
       handleSubmit();
     }

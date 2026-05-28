@@ -24,6 +24,7 @@ const TABS = [
 export default function App() {
   const [page, setPage] = useState("landing");
   const [objective, setObjective] = useState("");
+  const [activeObjective, setActiveObjective] = useState("");
   const [running, setRunning] = useState(false);
   const [agentStates, setAgentStates] = useState({});
   const [results, setResults] = useState({});
@@ -46,7 +47,7 @@ export default function App() {
       return;
     }
 
-    setObjective(targetObjective);
+    setActiveObjective(targetObjective);
     if (typeof window !== "undefined") {
       localStorage.setItem("founderos-objective", targetObjective);
     }
@@ -146,7 +147,7 @@ export default function App() {
 
       <ParticleCanvas />
 
-      <div style={{ position: "relative", zIndex: 2, marginRight: memoryOpen ? 260 : 0, transition: "margin-right 0.2s ease" }}>
+      <div style={{ position: "relative", zIndex: 2, marginRight: memoryOpen ? 260 : 0, transition: "margin-right 0.2s ease", paddingTop: 60 }}>
         <Header
           onLogoClick={() => setPage("landing")}
           memoryOpen={memoryOpen}
@@ -214,7 +215,7 @@ export default function App() {
           <ActivePanel
             data={activeData}
             loading={activeLoading}
-            objective={objective}
+            objective={activeObjective}
             onDataPatch={handleDataPatch}
             onActionTrigger={handleActionTrigger}
           />

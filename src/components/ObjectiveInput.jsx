@@ -29,8 +29,12 @@ export default function ObjectiveInput({ objective, setObjective, onLaunch, runn
     });
   };
 
-  const handleSubmit = async () => {
-    await onLaunch();
+  const handleSubmit = async (inputValue) => {
+    const nextObjective = typeof inputValue === "string" ? inputValue : objective;
+    const trimmedObjective = nextObjective.trim();
+    if (!trimmedObjective || running) return;
+    setObjective("");
+    await onLaunch(trimmedObjective);
   };
 
   return (
