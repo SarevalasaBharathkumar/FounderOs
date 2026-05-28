@@ -1,5 +1,5 @@
 "use client";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { orchestrate } from "./agents/orchestrator";
 import AgentStatusRow from "./components/AgentStatusRow";
 import Console from "./components/Console";
@@ -31,7 +31,7 @@ export default function App() {
   const [logs, setLogs] = useState([]);
   const [showConsole, setShowConsole] = useState(false);
   const [refreshTrigger, setRefreshTrigger] = useState(0);
-  const [memoryExpanded, setMemoryExpanded] = useState(true);
+  const [memoryOpen, setMemoryOpen] = useState(false);
 
   const activeTabConfig = useMemo(
     () => TABS.find((tab) => tab.key === activeTab) || TABS[0],
@@ -39,6 +39,8 @@ export default function App() {
   );
 
   const handleLaunch = async (objectiveOverride) => {
+    setPage("app");
+    window.scrollTo({ top: 0, behavior: "instant" });
     const targetObjective = typeof objectiveOverride === "string" ? objectiveOverride : objective;
     if (!targetObjective.trim() || running) {
       return;
@@ -92,6 +94,10 @@ export default function App() {
     }
   };
 
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: "instant" });
+  }, [page]);
+
   if (page === "landing") {
     return (
       <div
@@ -140,10 +146,11 @@ export default function App() {
 
       <ParticleCanvas />
 
-      <div style={{ position: "relative", zIndex: 2, marginRight: memoryExpanded ? 260 : 0, transition: "margin-right 0.2s ease" }}>
+      <div style={{ position: "relative", zIndex: 2, marginRight: memoryOpen ? 260 : 0, transition: "margin-right 0.2s ease" }}>
         <Header
           onLogoClick={() => setPage("landing")}
-          onToggleMemory={() => setMemoryExpanded((prev) => !prev)}
+          memoryOpen={memoryOpen}
+          onToggleMemory={() => setMemoryOpen((prev) => !prev)}
         />
         <ObjectiveInput
           objective={objective}
@@ -215,9 +222,8 @@ export default function App() {
       </div>
       <FounderMemory
         refreshTrigger={refreshTrigger}
-        expanded={memoryExpanded}
-        onToggle={setMemoryExpanded}
-        showFloatingToggle={false}
+        isOpen={memoryOpen}
+        onToggle={() => setMemoryOpen((prev) => !prev)}
       />
     </div>
   );

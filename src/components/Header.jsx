@@ -1,7 +1,9 @@
-"use client";
+﻿"use client";
 import { FONTS, T } from "../styles/tokens";
 
-export default function Header({ onLogoClick, onToggleMemory }) {
+export default function Header({ onLogoClick, memoryOpen, onToggleMemory }) {
+  void memoryOpen;
+
   return (
     <header
       style={{
@@ -52,22 +54,6 @@ export default function Header({ onLogoClick, onToggleMemory }) {
         </button>
 
         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-          <button
-            type="button"
-            onClick={onToggleMemory}
-            style={{
-              border: `1px solid ${T.border}`,
-              background: T.surfaceAlt,
-              color: T.dim,
-              borderRadius: 999,
-              padding: "5px 10px",
-              fontFamily: FONTS.mono,
-              fontSize: 11,
-              cursor: "pointer",
-            }}
-          >
-            ⚡ Memory
-          </button>
           <span
             style={{
               width: 8,
@@ -79,6 +65,35 @@ export default function Header({ onLogoClick, onToggleMemory }) {
             }}
           />
           <span style={{ color: T.dim, fontFamily: FONTS.mono, fontSize: 12 }}>AI COO · 4 Agents Online</span>
+          <button
+            type="button"
+            onClick={onToggleMemory}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.border = "1px solid rgba(255,255,255,0.2)";
+              e.currentTarget.style.color = "#ffffff";
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.border = "1px solid rgba(255,255,255,0.08)";
+              e.currentTarget.style.color = "#52525b";
+            }}
+            style={{
+              background: "transparent",
+              border: "1px solid rgba(255,255,255,0.08)",
+              borderRadius: 8,
+              padding: "6px 12px",
+              cursor: "pointer",
+              color: "#52525b",
+              fontFamily: FONTS.sans,
+              fontWeight: 500,
+              fontSize: "0.75rem",
+              display: "flex",
+              alignItems: "center",
+              gap: 6,
+              transition: "all 0.2s",
+            }}
+          >
+            ⚡ Memory
+          </button>
         </div>
       </div>
     </header>

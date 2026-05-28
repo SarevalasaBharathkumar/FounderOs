@@ -14,6 +14,7 @@ import CopyTwitterThreadButton from "./buttons/CopyTwitterThreadButton";
 import DownloadRiskRegisterButton from "./buttons/DownloadRiskRegisterButton";
 import GenerateValidationChecklistButton from "./buttons/GenerateValidationChecklistButton";
 import CopyDiscoveryScriptButton from "./buttons/CopyDiscoveryScriptButton";
+import GeneratePitchDeckButton from "./buttons/GeneratePitchDeckButton";
 
 const styles = {
   container: {
@@ -71,6 +72,7 @@ function ActionBar({ agentId, data, objective }) {
       <CopyPositioningButton key="copy-positioning" data={data} />,
     ],
     outreach: [
+      <GeneratePitchDeckButton key="generate-pitch-deck" data={data} objective={objective} />,
       <OpenInGmailButton key="open-in-gmail" data={data} />,
       <CopyEmailSequenceButton key="copy-email-sequence" data={data} />,
       <CopyInvestorPitchButton key="copy-investor-pitch" data={data} />,

@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 import { useEffect, useState } from "react";
 import { FONTS } from "../styles/tokens";
 
@@ -12,13 +12,13 @@ function formatTime(ts) {
 
 export default function FounderMemory({
   refreshTrigger,
-  expanded,
+  isOpen,
   onToggle,
-  showFloatingToggle = true,
 }) {
   const [objective, setObjective] = useState("");
   const [activity, setActivity] = useState([]);
   const [completedTasks, setCompletedTasks] = useState([]);
+  void onToggle;
 
   useEffect(() => {
     const storedObjective = localStorage.getItem("founderos-objective") || "";
@@ -38,43 +38,13 @@ export default function FounderMemory({
 
   return (
     <>
-      {showFloatingToggle ? (
-        <button
-          type="button"
-          onClick={() => onToggle(!expanded)}
-          style={{
-            position: "fixed",
-            right: expanded ? 280 : 0,
-            top: "50%",
-            transform: "translateY(-50%)",
-            width: 24,
-            height: 56,
-            background: "rgba(0,0,0,0.9)",
-            border: "1px solid rgba(255,255,255,0.08)",
-            borderRight: expanded ? "1px solid rgba(255,255,255,0.08)" : "none",
-            borderLeft: expanded ? "none" : "1px solid rgba(255,255,255,0.08)",
-            borderRadius: expanded ? "8px 0 0 8px" : "0 8px 8px 0",
-            cursor: "pointer",
-            color: "#52525b",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            fontSize: "0.7rem",
-            transition: "right 0.3s ease",
-            zIndex: 60,
-          }}
-        >
-          {expanded ? "›" : "‹"}
-        </button>
-      ) : null}
-
       <aside
         style={{
           position: "fixed",
           right: 0,
           top: 0,
           height: "100vh",
-          width: expanded ? "280px" : "0px",
+          width: isOpen ? "280px" : "0px",
           background: "rgba(0,0,0,0.95)",
           borderLeft: "1px solid rgba(255,255,255,0.06)",
           backdropFilter: "blur(20px)",

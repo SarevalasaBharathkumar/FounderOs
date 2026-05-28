@@ -219,6 +219,21 @@ export default function OutreachPanel({ data, loading, objective = "", onDataPat
   const emails = Array.isArray(panelData.coldEmailSequence) ? panelData.coldEmailSequence.slice(0, 3) : [];
   const linkedInMessage = panelData.linkedInMessage || "";
   const investorPitch = panelData.investorPitch || {};
+  const ACCENT = T.accent;
+  const RED = T.red;
+  const GREEN = T.green;
+  const AMBER = T.amber;
+  const ACCENT2 = T.purple;
+  const pitchFields = [
+    { key: "hook", label: "Hook", color: ACCENT },
+    { key: "problem", label: "Problem", color: RED },
+    { key: "solution", label: "Solution", color: GREEN },
+    { key: "marketOpportunity", label: "Market Opportunity", color: AMBER },
+    { key: "traction", label: "Traction", color: GREEN },
+    { key: "businessModel", label: "Business Model", color: ACCENT2 },
+    { key: "whyUs", label: "Why Us", color: ACCENT },
+    { key: "ask", label: "The Ask", color: RED },
+  ];
   const thread = Array.isArray(panelData.twitterThread) ? panelData.twitterThread : [];
 
   return (
@@ -245,18 +260,31 @@ export default function OutreachPanel({ data, loading, objective = "", onDataPat
 
         <div style={{ border: `1px solid ${T.border}`, borderRadius: 12, background: T.surface, padding: 14, display: "grid", gap: 10, alignContent: "start" }}>
           <div style={{ color: T.text, fontFamily: FONTS.sans, fontWeight: 700 }}>Investor Pitch</div>
-          {[
-            ["Hook", investorPitch.hook],
-            ["Problem", investorPitch.problem],
-            ["Solution", investorPitch.solution],
-            ["Traction", investorPitch.traction],
-            ["Ask", investorPitch.ask],
-          ].map(([label, value]) => (
-            <div key={label} style={{ border: `1px solid ${T.border}`, borderRadius: 10, background: T.surfaceAlt, padding: 10 }}>
-              <div style={{ fontFamily: FONTS.mono, fontSize: 12, color: T.accent, marginBottom: 5 }}>{label}</div>
-              <div style={{ color: T.text, lineHeight: 1.45 }}>{value || ""}</div>
-            </div>
-          ))}
+          <div style={{ border: `1px solid ${T.border}`, borderRadius: 10, background: T.surfaceAlt, padding: "0 12px" }}>
+            {pitchFields.map((field, index) => (
+              <div
+                key={field.key}
+                style={{
+                  padding: "0.75rem 0",
+                  borderBottom: index < pitchFields.length - 1 ? "1px solid rgba(255,255,255,0.05)" : "none",
+                }}
+              >
+                <div
+                  style={{
+                    fontFamily: FONTS.mono,
+                    fontSize: "0.62rem",
+                    textTransform: "uppercase",
+                    color: field.color,
+                    letterSpacing: "0.08em",
+                    marginBottom: "0.35rem",
+                  }}
+                >
+                  {field.label}
+                </div>
+                <div style={{ fontSize: "0.85rem", color: T.text, lineHeight: 1.6 }}>{investorPitch[field.key] || ""}</div>
+              </div>
+            ))}
+          </div>
           <SectionActions sectionName="Investor Pitch" sectionText={JSON.stringify(investorPitch)} onRegenerate={() => regenerate("Investor Pitch")} onAction={onActionTrigger} />
         </div>
       </div>
