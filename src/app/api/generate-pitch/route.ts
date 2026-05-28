@@ -33,11 +33,12 @@ export async function POST(req: NextRequest) {
     const RED = 'EF4444'
 
     const typeColors: Record<string, string> = {
-      cover: ACCENT, problem: RED, solution: GREEN,
-      market: AMBER, traction: GREEN, product: ACCENT,
-      business: ACCENT2, team: ACCENT, roadmap: ACCENT2, ask: ACCENT,
+      title: ACCENT, cover: ACCENT, problem: RED, solution: GREEN,
+      market: AMBER, drawbacks: 'F97316', team: '06B6D4', financialsask: '14B8A6', thankyou: ACCENT2, traction: GREEN, product: ACCENT,
+      business: ACCENT2, roadmap: ACCENT2, ask: ACCENT,
     }
 
+    const totalSlides = slides.length
     slides.forEach((slide: PitchSlide, index: number) => {
       const s = pres.addSlide()
       s.background = { color: BG }
@@ -49,7 +50,7 @@ export async function POST(req: NextRequest) {
         line: { color: accentColor },
       })
 
-      s.addText(`${index + 1}/10`, {
+      s.addText(`${index + 1}/${totalSlides}`, {
         x: 8.8, y: 5.2, w: 1, h: 0.3,
         fontSize: 9, color: MUTED, fontFace: 'Calibri', margin: 0,
       })
@@ -59,7 +60,7 @@ export async function POST(req: NextRequest) {
         fontSize: 9, color: MUTED, fontFace: 'Calibri', margin: 0,
       })
 
-      if (slide.type === 'cover') {
+      if (slide.type === 'title' || slide.type === 'cover') {
         s.addShape(pres.ShapeType.ellipse, {
           x: 2, y: 0.5, w: 6, h: 4.5,
           fill: { color: accentColor, transparency: 92 },
@@ -67,22 +68,24 @@ export async function POST(req: NextRequest) {
         })
 
         s.addText(slide.title || 'Startup', {
-          x: 0.5, y: 1.2, w: 9, h: 1.6,
-          fontSize: 54, bold: true, color: WHITE,
+          x: 0.5, y: slide.type === 'title' ? 1.0 : 1.2, w: 9, h: 1.6,
+          fontSize: slide.type === 'title' ? 56 : 50, bold: true, color: WHITE,
           fontFace: 'Calibri', align: 'center', margin: 0, charSpacing: -2,
         })
 
         s.addText(slide.subtitle || '', {
-          x: 0.5, y: 2.9, w: 9, h: 0.6,
-          fontSize: 18, color: SUBTEXT,
+          x: 0.5, y: 2.8, w: 9, h: 0.6,
+          fontSize: 19, color: SUBTEXT,
           fontFace: 'Calibri', align: 'center', margin: 0,
         })
 
-        s.addText(objective ? objective.slice(0, 100) : '', {
-          x: 1, y: 3.7, w: 8, h: 0.4,
-          fontSize: 11, color: MUTED,
-          fontFace: 'Calibri', align: 'center', margin: 0, italic: true,
-        })
+        if (slide.type === 'cover') {
+          s.addText(objective ? objective.slice(0, 100) : '', {
+            x: 1, y: 3.7, w: 8, h: 0.4,
+            fontSize: 11, color: MUTED,
+            fontFace: 'Calibri', align: 'center', margin: 0, italic: true,
+          })
+        }
 
         s.addShape(pres.ShapeType.rect, {
           x: 3.8, y: 4.4, w: 2.4, h: 0.35,
@@ -94,61 +97,23 @@ export async function POST(req: NextRequest) {
           fontSize: 8, bold: true, color: WHITE,
           fontFace: 'Calibri', align: 'center', charSpacing: 2, margin: 0,
         })
-      } else if (slide.type === 'ask') {
-        s.addText((slide.type || '').toUpperCase(), {
-          x: 0.4, y: 0.15, w: 4, h: 0.2,
-          fontSize: 9, color: accentColor,
-          fontFace: 'Calibri', charSpacing: 3, margin: 0,
+      } else if (slide.type === 'thankyou') {
+        s.addShape(pres.ShapeType.roundRect, {
+          x: 2.1, y: 1.6, w: 5.8, h: 2.6,
+          rectRadius: 0.12,
+          fill: { color: accentColor, transparency: 86 },
+          line: { color: accentColor, transparency: 15, pt: 1.5 },
         })
-
-        s.addText(slide.title || '', {
-          x: 0.4, y: 0.42, w: 9.2, h: 0.8,
-          fontSize: 32, bold: true, color: WHITE,
-          fontFace: 'Calibri', align: 'center', margin: 0, charSpacing: -1,
+        s.addText(slide.title || 'Thank You', {
+          x: 0.8, y: 2.15, w: 8.4, h: 0.9,
+          fontSize: 48, bold: true, color: WHITE,
+          fontFace: 'Calibri', align: 'center', margin: 0,
         })
-
-        if (slide.stat) {
-          s.addShape(pres.ShapeType.rect, {
-            x: 3.2, y: 1.4, w: 3.6, h: 1.4,
-            fill: { color: accentColor, transparency: 88 },
-            line: { color: accentColor },
-          })
-          s.addText(slide.stat, {
-            x: 3.2, y: 1.5, w: 3.6, h: 0.9,
-            fontSize: 44, bold: true, color: WHITE,
-            fontFace: 'Calibri', align: 'center', margin: 0,
-          })
-          if (slide.statLabel) {
-            s.addText(slide.statLabel, {
-              x: 3.2, y: 2.4, w: 3.6, h: 0.3,
-              fontSize: 11, color: SUBTEXT,
-              fontFace: 'Calibri', align: 'center', margin: 0,
-            })
-          }
-        }
-
-        const bulletItems = Array.isArray(slide.bullets) ? slide.bullets : []
-        const bulletY = slide.stat ? 3.0 : 1.5
-        const bulletsArr = bulletItems.map((b: string, i: number) => ({
-          text: b,
-          options: { breakLine: i < bulletItems.length - 1, color: SUBTEXT },
-        }))
-        if (bulletsArr.length > 0) {
-          s.addText(bulletsArr, {
-            x: 1, y: bulletY, w: 8, h: 1.8,
-            fontSize: 13, fontFace: 'Calibri',
-            align: 'center', bullet: false, margin: 0,
-            paraSpaceAfter: 8,
-          })
-        }
-
-        if (slide.subtitle) {
-          s.addText(slide.subtitle, {
-            x: 0.5, y: 4.85, w: 9, h: 0.3,
-            fontSize: 12, color: accentColor,
-            fontFace: 'Calibri', align: 'center', italic: true, margin: 0,
-          })
-        }
+        s.addText(slide.subtitle || '', {
+          x: 1.2, y: 3.15, w: 7.6, h: 0.45,
+          fontSize: 16, color: SUBTEXT,
+          fontFace: 'Calibri', align: 'center', margin: 0,
+        })
       } else {
         s.addText((slide.type || '').toUpperCase(), {
           x: 0.4, y: 0.14, w: 5, h: 0.2,
@@ -157,46 +122,40 @@ export async function POST(req: NextRequest) {
         })
 
         s.addText(slide.title || '', {
-          x: 0.4, y: 0.42, w: slide.stat ? 5.8 : 9.2, h: 0.85,
-          fontSize: 30, bold: true, color: WHITE,
+          x: 0.4, y: 0.42, w: slide.stat ? 6.1 : 9.2, h: 0.95,
+          fontSize: 33, bold: true, color: WHITE,
           fontFace: 'Calibri', margin: 0, charSpacing: -1,
         })
 
         if (slide.subtitle) {
           s.addText(slide.subtitle, {
-            x: 0.4, y: 1.32, w: slide.stat ? 5.8 : 9.2, h: 0.45,
-            fontSize: 13, color: SUBTEXT,
+            x: 0.4, y: 1.32, w: slide.stat ? 6.1 : 9.2, h: 0.52,
+            fontSize: 14, color: SUBTEXT,
             fontFace: 'Calibri', margin: 0,
           })
         }
 
         if (slide.stat) {
-          s.addShape(pres.ShapeType.rect, {
-            x: 6.6, y: 1.0, w: 3.0, h: 3.2,
-            fill: { color: accentColor, transparency: 88 },
-            line: { color: accentColor },
-          })
-          s.addShape(pres.ShapeType.rect, {
-            x: 6.6, y: 1.0, w: 3.0, h: 0.05,
-            fill: { color: accentColor },
-            line: { color: accentColor },
+          s.addShape(pres.ShapeType.roundRect, {
+            x: 6.7, y: 1.02, w: 2.85, h: 3.0,
+            rectRadius: 0.08,
+            fill: { color: accentColor, transparency: 86 },
+            line: { color: accentColor, transparency: 18, pt: 1.2 },
           })
           s.addText(slide.stat, {
-            x: 6.6, y: 1.6, w: 3.0, h: 1.3,
-            fontSize: 46, bold: true, color: WHITE,
-            fontFace: 'Calibri', align: 'center', margin: 0, charSpacing: -2,
+            x: 6.7, y: 1.85, w: 2.85, h: 0.9,
+            fontSize: 36, bold: true, color: WHITE,
+            fontFace: 'Calibri', align: 'center', margin: 0,
           })
-          if (slide.statLabel) {
-            s.addText(slide.statLabel, {
-              x: 6.6, y: 3.0, w: 3.0, h: 0.6,
-              fontSize: 12, color: SUBTEXT,
-              fontFace: 'Calibri', align: 'center', margin: 0,
-            })
-          }
+          s.addText(slide.statLabel || '', {
+            x: 6.7, y: 2.85, w: 2.85, h: 0.36,
+            fontSize: 11, color: SUBTEXT,
+            fontFace: 'Calibri', align: 'center', margin: 0,
+          })
         }
 
         const bulletItems = Array.isArray(slide.bullets) ? slide.bullets : []
-        const bw = slide.stat ? 5.8 : 9.2
+        const bw = slide.stat ? 6.1 : 9.2
         const bulletsData = bulletItems.map((b: string, i: number) => ({
           text: '  ' + b,
           options: {
@@ -207,9 +166,9 @@ export async function POST(req: NextRequest) {
         }))
         if (bulletsData.length > 0) {
           s.addText(bulletsData, {
-            x: 0.4, y: slide.subtitle ? 1.9 : 1.45,
-            w: bw, h: 3.0,
-            fontSize: 14, fontFace: 'Calibri',
+            x: 0.4, y: slide.subtitle ? 2.0 : 1.6,
+            w: bw, h: 2.9,
+            fontSize: 15, fontFace: 'Calibri',
             margin: 0, paraSpaceAfter: 10,
           })
         }

@@ -4,10 +4,15 @@ import { useEffect, useRef, useState } from "react";
 import ActionButton from "../ActionButton";
 
 const TYPE_COLORS = {
+  title: "#6366F1",
   cover: "#6366F1",
   problem: "#EF4444",
   solution: "#22C55E",
   market: "#F59E0B",
+  drawbacks: "#F97316",
+  team: "#06B6D4",
+  financialsask: "#14B8A6",
+  thankyou: "#8B5CF6",
   traction: "#22C55E",
   product: "#6366F1",
   business: "#8B5CF6",
@@ -60,7 +65,7 @@ function ClickGame({ onScore }) {
       style={{
         position: "relative",
         width: "100%",
-        height: "220px",
+        height: "360px",
         background: "rgba(99,102,241,0.04)",
         border: "1px solid rgba(99,102,241,0.12)",
         borderRadius: "16px",
@@ -157,6 +162,7 @@ async function exportPptxClientSide(slides, objective) {
   const SUBTEXT = "A1A1AA";
   const MUTED = "52525B";
 
+  const totalSlides = Array.isArray(slides) ? slides.length : 0;
   slides.forEach((slide, index) => {
     const s = pres.addSlide();
     const accentColor = (TYPE_COLORS[slide?.type] || "#6366F1").replace("#", "");
@@ -171,7 +177,7 @@ async function exportPptxClientSide(slides, objective) {
       line: { color: accentColor },
     });
 
-    s.addText(`${index + 1}/10`, {
+    s.addText(`${index + 1}/${totalSlides}`, {
       x: 8.8,
       y: 5.2,
       w: 1,
@@ -193,7 +199,7 @@ async function exportPptxClientSide(slides, objective) {
       margin: 0,
     });
 
-    if (slide?.type === "cover") {
+    if (slide?.type === "title" || slide?.type === "cover") {
       s.addShape(pres.ShapeType.ellipse, {
         x: 2,
         y: 0.5,
@@ -204,10 +210,10 @@ async function exportPptxClientSide(slides, objective) {
       });
       s.addText(slide?.title || "Startup", {
         x: 0.5,
-        y: 1.2,
+        y: slide?.type === "title" ? 1.0 : 1.2,
         w: 9,
         h: 1.6,
-        fontSize: 54,
+        fontSize: slide?.type === "title" ? 56 : 50,
         bold: true,
         color: WHITE,
         fontFace: "Calibri",
@@ -216,26 +222,61 @@ async function exportPptxClientSide(slides, objective) {
       });
       s.addText(slide?.subtitle || "", {
         x: 0.5,
-        y: 2.9,
+        y: 2.8,
         w: 9,
         h: 0.6,
-        fontSize: 18,
+        fontSize: 19,
         color: SUBTEXT,
         fontFace: "Calibri",
         align: "center",
         margin: 0,
       });
-      s.addText(objective ? objective.slice(0, 100) : "", {
-        x: 1,
-        y: 3.7,
-        w: 8,
-        h: 0.4,
-        fontSize: 11,
-        color: MUTED,
+      if (slide?.type === "cover") {
+        s.addText(objective ? objective.slice(0, 100) : "", {
+          x: 1,
+          y: 3.7,
+          w: 8,
+          h: 0.4,
+          fontSize: 11,
+          color: MUTED,
+          fontFace: "Calibri",
+          align: "center",
+          margin: 0,
+          italic: true,
+        });
+      }
+    } else if (slide?.type === "thankyou") {
+      s.addShape(pres.ShapeType.roundRect, {
+        x: 2.1,
+        y: 1.6,
+        w: 5.8,
+        h: 2.6,
+        rectRadius: 0.12,
+        fill: { color: accentColor, transparency: 86 },
+        line: { color: accentColor, transparency: 15, pt: 1.5 },
+      });
+      s.addText(slide?.title || "Thank You", {
+        x: 0.8,
+        y: 2.15,
+        w: 8.4,
+        h: 0.9,
+        fontSize: 48,
+        bold: true,
+        color: WHITE,
         fontFace: "Calibri",
         align: "center",
         margin: 0,
-        italic: true,
+      });
+      s.addText(slide?.subtitle || "", {
+        x: 1.2,
+        y: 3.15,
+        w: 7.6,
+        h: 0.45,
+        fontSize: 16,
+        color: SUBTEXT,
+        fontFace: "Calibri",
+        align: "center",
+        margin: 0,
       });
     } else {
       s.addText(String(slide?.type || "").toUpperCase(), {
@@ -252,9 +293,9 @@ async function exportPptxClientSide(slides, objective) {
       s.addText(slide?.title || "", {
         x: 0.4,
         y: 0.42,
-        w: slide?.stat ? 5.8 : 9.2,
-        h: 0.85,
-        fontSize: 30,
+        w: slide?.stat ? 6.1 : 9.2,
+        h: 0.95,
+        fontSize: 33,
         bold: true,
         color: WHITE,
         fontFace: "Calibri",
@@ -264,11 +305,46 @@ async function exportPptxClientSide(slides, objective) {
         s.addText(slide.subtitle, {
           x: 0.4,
           y: 1.32,
-          w: slide?.stat ? 5.8 : 9.2,
-          h: 0.45,
-          fontSize: 13,
+          w: slide?.stat ? 6.1 : 9.2,
+          h: 0.52,
+          fontSize: 14,
           color: SUBTEXT,
           fontFace: "Calibri",
+          margin: 0,
+        });
+      }
+
+      if (slide?.stat) {
+        s.addShape(pres.ShapeType.roundRect, {
+          x: 6.7,
+          y: 1.02,
+          w: 2.85,
+          h: 3.0,
+          rectRadius: 0.08,
+          fill: { color: accentColor, transparency: 86 },
+          line: { color: accentColor, transparency: 18, pt: 1.2 },
+        });
+        s.addText(slide?.stat, {
+          x: 6.7,
+          y: 1.85,
+          w: 2.85,
+          h: 0.9,
+          fontSize: 36,
+          bold: true,
+          color: WHITE,
+          fontFace: "Calibri",
+          align: "center",
+          margin: 0,
+        });
+        s.addText(slide?.statLabel || "", {
+          x: 6.7,
+          y: 2.85,
+          w: 2.85,
+          h: 0.36,
+          fontSize: 11,
+          color: SUBTEXT,
+          fontFace: "Calibri",
+          align: "center",
           margin: 0,
         });
       }
@@ -285,10 +361,10 @@ async function exportPptxClientSide(slides, objective) {
       if (bulletsData.length > 0) {
         s.addText(bulletsData, {
           x: 0.4,
-          y: slide?.subtitle ? 1.9 : 1.45,
-          w: slide?.stat ? 5.8 : 9.2,
-          h: 3.0,
-          fontSize: 14,
+          y: slide?.subtitle ? 2.0 : 1.6,
+          w: slide?.stat ? 6.1 : 9.2,
+          h: 2.9,
+          fontSize: 15,
           fontFace: "Calibri",
           margin: 0,
           paraSpaceAfter: 10,
@@ -311,6 +387,7 @@ export default function GeneratePitchDeckButton({ data, objective }) {
   const [editing, setEditing] = useState(false);
 
   async function fetchSlideContent() {
+    const targetTypes = ["title", "problem", "solution", "market", "drawbacks", "team", "financialsask", "thankyou"];
     const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
       method: "POST",
       headers: {
@@ -327,23 +404,20 @@ export default function GeneratePitchDeckButton({ data, objective }) {
             role: "system",
             content: `You are a pitch deck strategist who has helped 200+ startups raise 
 funding from YC, Sequoia, and a16z. Generate pitch deck slide content.
-Return ONLY a valid JSON array of exactly 10 objects. No markdown. No explanation.`,
+Return ONLY a valid JSON array of exactly 8 objects. No markdown. No explanation.`,
           },
           {
             role: "user",
-            content: `Create a 10-slide investor pitch deck:
+            content: `Create a 8-slide investor pitch deck:
 
 Objective: ${objective}
 Hook: ${data.investorPitch?.hook || ""}
 Problem: ${data.investorPitch?.problem || ""}
 Solution: ${data.investorPitch?.solution || ""}
 Market: ${data.investorPitch?.marketOpportunity || data.investorPitch?.market || ""}
-Traction: ${data.investorPitch?.traction || ""}
-Business Model: ${data.investorPitch?.businessModel || ""}
-Why Us: ${data.investorPitch?.whyUs || ""}
-Ask: ${data.investorPitch?.ask || ""}
+Drawbacks: ${data.investorPitch?.risks || data.investorPitch?.blindSpots || ""}
 
-Return JSON array of 10 slides:
+Return JSON array of 8 slides:
 [{
   "slideNumber": 1,
   "title": "string",
@@ -351,10 +425,10 @@ Return JSON array of 10 slides:
   "bullets": ["point 1 under 12 words", "point 2", "point 3"],
   "stat": "big number/metric (optional, e.g. $4.2B or 340%)",
   "statLabel": "label for stat (optional)",
-  "type": "cover|problem|solution|market|traction|product|business|team|roadmap|ask"
+  "type": "title|problem|solution|market|drawbacks|team|financialsask|thankyou"
 }]
 
-Slide order: cover, problem, solution, market, product, traction, business, team, roadmap, ask
+Slide order: title, problem, solution, market, drawbacks, team, financialsask, thankyou
 All content specific to this startup. No generic placeholders.`,
           },
         ],
@@ -382,15 +456,18 @@ All content specific to this startup. No generic placeholders.`,
     if (!Array.isArray(parsed) || parsed.length === 0) {
       throw new Error("No slides generated");
     }
-    return parsed.slice(0, 10).map((slide, index) => ({
-      slideNumber: index + 1,
-      title: slide?.title || `Slide ${index + 1}`,
-      subtitle: slide?.subtitle || "",
-      bullets: Array.isArray(slide?.bullets) ? slide.bullets : [],
-      stat: slide?.stat || "",
-      statLabel: slide?.statLabel || "",
-      type: slide?.type || "cover",
-    }));
+    return targetTypes.map((type, index) => {
+      const incoming = parsed.find((s) => s?.type === type) || parsed[index] || {};
+      return {
+        slideNumber: index + 1,
+        title: incoming?.title || `Slide ${index + 1}`,
+        subtitle: incoming?.subtitle || "",
+        bullets: Array.isArray(incoming?.bullets) ? incoming.bullets : [],
+        stat: incoming?.stat || "",
+        statLabel: incoming?.statLabel || "",
+        type,
+      };
+    });
   }
 
   async function downloadPPTX(slidesToUse) {
@@ -536,16 +613,16 @@ All content specific to this startup. No generic placeholders.`,
             background: "rgba(0,0,0,0.92)",
             backdropFilter: "blur(8px)",
             display: "flex",
-            alignItems: "flex-start",
+            alignItems: "center",
             justifyContent: "center",
-            paddingTop: "3vh",
+            padding: "2vh 1rem",
             overflowY: "auto",
           }}
         >
           <div
             onClick={(e) => e.stopPropagation()}
             style={{
-              width: "min(720px, calc(100vw - 2rem))",
+              width: "min(1180px, calc(100vw - 2rem))",
               background: "#0a0a0a",
               border: "1px solid rgba(255,255,255,0.08)",
               borderRadius: 20,
@@ -559,7 +636,9 @@ All content specific to this startup. No generic placeholders.`,
               <div>
                 <div style={{ fontWeight: 600, fontSize: "1rem", marginBottom: 14 }}>Crafting your investor pitch deck...</div>
                 <div style={{ textAlign: "center", fontSize: "0.72rem", color: "#52525b", margin: "10px 0" }}>Play while you wait</div>
-                <ClickGame onScore={setGameScore} />
+                <div style={{ width: "100%", maxWidth: 980, margin: "0 auto" }}>
+                  <ClickGame onScore={setGameScore} />
+                </div>
                 <div style={{ textAlign: "center", marginTop: 10, fontSize: "0.8rem", color: "#6366f1", fontWeight: 500 }}>
                   Your score: {gameScore} clicks 🎯
                 </div>
@@ -571,7 +650,7 @@ All content specific to this startup. No generic placeholders.`,
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "1.2rem" }}>
                   <div>
                     <div style={{ fontWeight: 700, fontSize: "1rem", color: "#fff" }}>🎯 Your Pitch is Ready!</div>
-                    <div style={{ fontSize: "0.72rem", color: "#52525b", marginTop: 2 }}>10 slides · Investor-ready · Fully editable</div>
+                    <div style={{ fontSize: "0.72rem", color: "#52525b", marginTop: 2 }}>8 slides · Investor-ready · Fully editable</div>
                   </div>
                   <button type="button" onClick={() => setShowModal(false)} style={ghostBtn}>✕ Close</button>
                 </div>
@@ -620,6 +699,7 @@ All content specific to this startup. No generic placeholders.`,
                 </div>
 
                 {!editing ? (
+                  <div style={{ display: "flex", justifyContent: "center" }}>
                   <div
                     style={{
                       background: "#0a0a0a",
@@ -627,70 +707,100 @@ All content specific to this startup. No generic placeholders.`,
                       borderRadius: 16,
                       padding: 0,
                       overflow: "hidden",
-                      minHeight: 320,
+                      width: "100%",
+                      maxWidth: 666,
+                      aspectRatio: "16 / 9",
                       position: "relative",
                     }}
                   >
                     <div style={{ height: 4, width: "100%", background: typeColor }} />
-                    <div style={{ padding: "1.5rem" }}>
-                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                        <span
-                          style={{
-                            background: `${typeColor}22`,
-                            border: `1px solid ${typeColor}44`,
-                            borderRadius: 999,
-                            padding: "3px 10px",
-                            fontFamily: "Inter, -apple-system, BlinkMacSystemFont, sans-serif",
-                            fontWeight: 600,
-                            fontSize: "0.65rem",
-                            color: typeColor,
-                          }}
-                        >
-                          {String(currentSlide.type || "").toUpperCase()}
-                        </span>
-                        <span style={{ fontFamily: "Inter, -apple-system, BlinkMacSystemFont, sans-serif", fontWeight: 400, fontSize: "0.72rem", color: "#52525b" }}>
-                          {`Slide ${activeSlide + 1} of 10`}
-                        </span>
-                      </div>
-                      <div style={{ marginTop: "1rem", fontFamily: "Inter, -apple-system, BlinkMacSystemFont, sans-serif", fontWeight: 800, fontSize: "1.5rem", color: "#fff", letterSpacing: "-0.03em", lineHeight: 1.1 }}>
-                        {currentSlide.title}
-                      </div>
-                      <div style={{ marginTop: "0.4rem", fontFamily: "Inter, -apple-system, BlinkMacSystemFont, sans-serif", fontWeight: 400, fontSize: "0.9rem", color: "#a1a1aa", lineHeight: 1.5 }}>
-                        {currentSlide.subtitle}
-                      </div>
-
-                      {currentSlide.stat ? (
-                        <div
-                          style={{
-                            marginTop: "1rem",
-                            display: "inline-flex",
-                            alignItems: "baseline",
-                            gap: 8,
-                            background: `${typeColor}15`,
-                            border: `1px solid ${typeColor}33`,
-                            borderRadius: 10,
-                            padding: "8px 16px",
-                          }}
-                        >
-                          <span style={{ fontFamily: "Inter, -apple-system, BlinkMacSystemFont, sans-serif", fontWeight: 800, fontSize: "2rem", color: typeColor }}>
-                            {currentSlide.stat}
-                          </span>
-                          <span style={{ fontFamily: "Inter, -apple-system, BlinkMacSystemFont, sans-serif", fontWeight: 400, fontSize: "0.78rem", color: "#71717a" }}>
-                            {currentSlide.statLabel}
-                          </span>
+                    <div style={{ padding: "1.5rem", height: "100%" }}>
+                      {currentSlide.type === "title" || currentSlide.type === "cover" ? (
+                        <div style={{ height: "100%", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", textAlign: "center" }}>
+                          <div style={{ fontFamily: "Inter, -apple-system, BlinkMacSystemFont, sans-serif", fontWeight: 900, fontSize: "3.9rem", color: "#fff", letterSpacing: "-0.04em", lineHeight: 1 }}>
+                            {currentSlide.title}
+                          </div>
+                          <div style={{ marginTop: "0.8rem", fontFamily: "Inter, -apple-system, BlinkMacSystemFont, sans-serif", fontWeight: 400, fontSize: "1.3rem", color: "#a1a1aa", maxWidth: "78%" }}>
+                            {currentSlide.subtitle}
+                          </div>
                         </div>
-                      ) : null}
-
-                      <div style={{ marginTop: "1rem" }}>
-                        {(currentSlide.bullets || []).map((b, idx) => (
-                          <div key={idx} style={{ display: "flex", alignItems: "flex-start", gap: 8, marginBottom: 8 }}>
-                            <span style={{ width: 6, height: 6, borderRadius: "50%", background: typeColor, flexShrink: 0, marginTop: 7 }} />
-                            <span style={{ fontFamily: "Inter, -apple-system, BlinkMacSystemFont, sans-serif", fontWeight: 400, fontSize: "0.88rem", color: "#a1a1aa", lineHeight: 1.5 }}>
-                              {b}
+                      ) : currentSlide.type === "thankyou" ? (
+                        <div style={{ height: "100%", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", textAlign: "center" }}>
+                          <div style={{ fontFamily: "Inter, -apple-system, BlinkMacSystemFont, sans-serif", fontWeight: 900, fontSize: "4.2rem", color: "#fff", letterSpacing: "-0.04em", lineHeight: 1 }}>
+                            {currentSlide.title || "Thank You"}
+                          </div>
+                          <div style={{ marginTop: "0.8rem", fontFamily: "Inter, -apple-system, BlinkMacSystemFont, sans-serif", fontWeight: 400, fontSize: "1.15rem", color: "#a1a1aa", maxWidth: "72%" }}>
+                            {currentSlide.subtitle}
+                          </div>
+                        </div>
+                      ) : (
+                        <>
+                          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                            <span
+                              style={{
+                                background: `${typeColor}22`,
+                                border: `1px solid ${typeColor}44`,
+                                borderRadius: 999,
+                                padding: "3px 10px",
+                                fontFamily: "Inter, -apple-system, BlinkMacSystemFont, sans-serif",
+                                fontWeight: 600,
+                                fontSize: "0.65rem",
+                                color: typeColor,
+                              }}
+                            >
+                              {String(currentSlide.type || "").toUpperCase()}
+                            </span>
+                            <span style={{ fontFamily: "Inter, -apple-system, BlinkMacSystemFont, sans-serif", fontWeight: 400, fontSize: "0.72rem", color: "#52525b" }}>
+                              {`Slide ${activeSlide + 1} of ${(editableSlides || []).length}`}
                             </span>
                           </div>
-                        ))}
-                      </div>
+                          <div style={{ marginTop: "0.9rem", fontFamily: "Inter, -apple-system, BlinkMacSystemFont, sans-serif", fontWeight: 800, fontSize: "2.5rem", color: "#fff", letterSpacing: "-0.03em", lineHeight: 1.1, maxWidth: currentSlide.stat ? "70%" : "100%" }}>
+                            {currentSlide.title}
+                          </div>
+                          <div style={{ marginTop: "0.45rem", fontFamily: "Inter, -apple-system, BlinkMacSystemFont, sans-serif", fontWeight: 400, fontSize: "1.12rem", color: "#a1a1aa", lineHeight: 1.4, maxWidth: currentSlide.stat ? "70%" : "100%" }}>
+                            {currentSlide.subtitle}
+                          </div>
+
+                          {currentSlide.stat ? (
+                            <div
+                              style={{
+                                position: "absolute",
+                                right: "1.5rem",
+                                top: "5.1rem",
+                                width: "27%",
+                                minHeight: "42%",
+                                background: `${typeColor}22`,
+                                border: `1px solid ${typeColor}66`,
+                                borderRadius: 14,
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "center",
+                                flexDirection: "column",
+                                padding: "0.8rem",
+                                textAlign: "center",
+                              }}
+                            >
+                              <span style={{ fontFamily: "Inter, -apple-system, BlinkMacSystemFont, sans-serif", fontWeight: 900, fontSize: "2.55rem", color: "#fff", lineHeight: 1.05 }}>
+                                {currentSlide.stat}
+                              </span>
+                              <span style={{ marginTop: 6, fontFamily: "Inter, -apple-system, BlinkMacSystemFont, sans-serif", fontWeight: 400, fontSize: "0.95rem", color: "#d4d4d8" }}>
+                                {currentSlide.statLabel}
+                              </span>
+                            </div>
+                          ) : null}
+
+                          <div style={{ marginTop: "1rem", maxWidth: currentSlide.stat ? "70%" : "100%" }}>
+                            {(currentSlide.bullets || []).map((b, idx) => (
+                              <div key={idx} style={{ display: "flex", alignItems: "flex-start", gap: 10, marginBottom: 10 }}>
+                                <span style={{ width: 8, height: 8, borderRadius: "50%", background: typeColor, flexShrink: 0, marginTop: 7, boxShadow: `0 0 6px ${typeColor}` }} />
+                                <span style={{ fontFamily: "Inter, -apple-system, BlinkMacSystemFont, sans-serif", fontWeight: 400, fontSize: "1.1rem", color: "#d4d4d8", lineHeight: 1.4 }}>
+                                  {b}
+                                </span>
+                              </div>
+                            ))}
+                          </div>
+                        </>
+                      )}
                     </div>
 
                     <div
@@ -708,6 +818,7 @@ All content specific to this startup. No generic placeholders.`,
                     >
                       {activeSlide + 1}
                     </div>
+                  </div>
                   </div>
                 ) : (
                   <div style={previewCard}>
@@ -742,7 +853,14 @@ All content specific to this startup. No generic placeholders.`,
 
                 <div style={{ borderTop: "1px solid rgba(255,255,255,0.06)", paddingTop: "1rem", marginTop: "1rem", display: "flex", gap: 10, alignItems: "center" }}>
                   <button type="button" style={{ ...ghostBtn, opacity: activeSlide === 0 ? 0.5 : 1 }} disabled={activeSlide === 0} onClick={() => setActiveSlide((p) => p - 1)}>← Prev</button>
-                  <button type="button" style={{ ...ghostBtn, opacity: activeSlide === 9 ? 0.5 : 1 }} disabled={activeSlide === 9} onClick={() => setActiveSlide((p) => p + 1)}>Next →</button>
+                  <button
+                    type="button"
+                    style={{ ...ghostBtn, opacity: activeSlide >= (editableSlides || []).length - 1 ? 0.5 : 1 }}
+                    disabled={activeSlide >= (editableSlides || []).length - 1}
+                    onClick={() => setActiveSlide((p) => Math.min((editableSlides || []).length - 1, p + 1))}
+                  >
+                    Next →
+                  </button>
                   <button
                     type="button"
                     onClick={() => {
