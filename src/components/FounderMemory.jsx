@@ -18,6 +18,7 @@ export default function FounderMemory({
   const [objective, setObjective] = useState("");
   const [activity, setActivity] = useState([]);
   const [completedTasks, setCompletedTasks] = useState([]);
+  const [recentMeetings, setRecentMeetings] = useState([]);
   void onToggle;
 
   useEffect(() => {
@@ -34,6 +35,13 @@ export default function FounderMemory({
       .filter(([, done]) => !!done)
       .map(([taskId]) => labels[taskId] || taskId);
     setCompletedTasks(taskNames);
+
+    fetch("/api/meeting/sessions?limit=5")
+      .then((res) => (res.ok ? res.json() : { sessions: [] }))
+      .then((payload) => {
+        setRecentMeetings((payload.sessions || []).filter((s) => s.output).slice(0, 3));
+      })
+      .catch(() => setRecentMeetings([]));
   }, [refreshTrigger]);
 
   return (
@@ -98,6 +106,29 @@ export default function FounderMemory({
                     <span style={{ fontFamily: FONTS.sans, fontSize: "0.62rem", color: "#3f3f46", flexShrink: 0 }}>
                       {formatTime(entry.ts)}
                     </span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          <div>
+            <div style={{ fontFamily: FONTS.sans, fontSize: "0.65rem", fontWeight: 600, color: "#52525b", letterSpacing: "0.08em", textTransform: "uppercase", marginBottom: "0.5rem" }}>
+              Recent Meetings
+            </div>
+            {recentMeetings.length === 0 ? (
+              <div style={{ fontFamily: FONTS.sans, fontSize: "0.75rem", color: "#3f3f46", fontStyle: "italic", textAlign: "center", padding: "0.5rem 0 1rem" }}>
+                No meeting summaries yet.
+              </div>
+            ) : (
+              <div style={{ display: "grid", gap: 8, marginBottom: "1rem" }}>
+                {recentMeetings.map((meeting) => (
+                  <div key={meeting.id} style={{ border: "1px solid rgba(255,255,255,0.07)", borderRadius: 10, padding: "8px 10px", background: "rgba(255,255,255,0.03)" }}>
+                    <div style={{ color: "#a1a1aa", fontSize: "0.7rem", marginBottom: 4 }}>{formatTime(meeting.createdAt)} · {meeting.status}</div>
+                    <div style={{ color: "#d4d4d8", fontSize: "0.74rem", lineHeight: 1.45 }}>{meeting.output?.meetingSummary || "Meeting summary unavailable."}</div>
+                    <div style={{ color: "#71717a", fontSize: "0.68rem", marginTop: 4 }}>
+                      {Array.isArray(meeting.output?.tasks) ? meeting.output.tasks.length : 0} tasks · {Array.isArray(meeting.output?.decisions) ? meeting.output.decisions.length : 0} decisions
+                    </div>
                   </div>
                 ))}
               </div>

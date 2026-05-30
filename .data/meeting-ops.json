@@ -1,0 +1,47 @@
+{
+  "sessions": [
+    {
+      "id": "ms_1780163402391_leyt40",
+      "meetingUrl": "https://meet.google.com/xmk-boek-ucp",
+      "status": "transcript_ready",
+      "createdAt": "2026-05-30T17:50:02.391Z",
+      "updatedAt": "2026-05-30T17:52:20.177Z",
+      "transcriptChunks": [
+        {
+          "ts": "2026-05-30T17:50:37.270Z",
+          "speaker": "Bharath Kumar",
+          "text": "and right now i'm going to resume the start form to write here on the director sustainable and antigen watch this value is installing along this to add the meeting installed by this personal business helps in saving this time"
+        }
+      ],
+      "providerMeetingId": "211d06ca-fb46-4e7b-96fd-9fc026f9a3e3",
+      "output": {
+        "meetingSummary": "The speaker, Bharath Kumar, briefly mentioned resuming a form related to a director sustainable and antigen watch, and referenced installing something that helps save time in personal business.",
+        "decisions": [],
+        "tasks": []
+      }
+    },
+    {
+      "id": "ms_1780156859518_339ed1",
+      "meetingUrl": "https://meet.google.com/deq-dwmn-siz",
+      "status": "transcript_ready",
+      "createdAt": "2026-05-30T16:00:59.518Z",
+      "updatedAt": "2026-05-30T17:38:02.687Z",
+      "transcriptChunks": [
+        {
+          "ts": "2026-05-30T16:01:17.824Z",
+          "speaker": "Bharath Kumar",
+          "text": "hello foreign first of all congratulations for joining here i think we are successful we creating a join meeting board yes it's very helpful for the ceo for the founders because instead of wasting of returning many member of meetings we can just the real user can just go to the imported meetings and the list preference one can directly join the help of the bot so we make sure it doesn't feel missing any content or important information and this is a summary of your usage thank you can we just ending the call"
+        }
+      ],
+      "providerMeetingId": "de017387-bc79-4fd8-9497-d3f45e257faa",
+      "output": {
+        "meetingSummary": "Bharath Kumar welcomed participants, congratulated them on joining, and discussed the benefits of a joint meeting board that helps CEOs and founders avoid redundant meetings. He highlighted that the board allows users to access imported meetings and join via a bot, ensuring no important content is missed. He concluded the meeting.",
+        "decisions": [],
+        "tasks": []
+      }
+    }
+  ],
+  "owners": [],
+  "processedEvents": [],
+  "taskSync": []
+}

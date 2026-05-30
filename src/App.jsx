@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 import { useEffect, useMemo, useState } from "react";
 import { orchestrate } from "./agents/orchestrator";
 import AgentStatusRow from "./components/AgentStatusRow";
@@ -9,6 +9,7 @@ import LandingPage from "./components/landing/LandingPage";
 import ObjectiveInput from "./components/ObjectiveInput";
 import ParticleCanvas from "./components/ui/ParticleCanvas";
 import GTMPanel from "./tabs/GTMPanel";
+import MeetingOpsPanel from "./tabs/MeetingOpsPanel";
 import OutreachPanel from "./tabs/OutreachPanel";
 import RiskPanel from "./tabs/RiskPanel";
 import RoadmapPanel from "./tabs/RoadmapPanel";
@@ -19,6 +20,7 @@ const TABS = [
   { key: "gtm", label: "GTM 🎯", agentId: "gtm", Component: GTMPanel },
   { key: "outreach", label: "Outreach 📨", agentId: "outreach", Component: OutreachPanel },
   { key: "risk", label: "Risk 🛡️", agentId: "risk", Component: RiskPanel },
+  { key: "meetingops", label: "Meeting Ops", agentId: "meetingops", Component: MeetingOpsPanel },
 ];
 
 export default function App() {
@@ -229,3 +231,4 @@ export default function App() {
     </div>
   );
 }
+
